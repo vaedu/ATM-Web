@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.atm.mapper.AccountMapper">
+
+    <!-- 注册账户 -->
+    <insert id="insert" parameterType="com.example.atm.entity.Account">
+        INSERT INTO account(card, name, password, balance, `limit`, sex)
+        VALUES (#{card}, #{name}, #{password}, #{balance}, #{limit}, #{sex});
+    </insert>
+
+    <!-- 根据卡号查询账户 -->
+    <select id="findByCardNumber" resultType="com.example.atm.entity.Account">
+        SELECT card,
+               name,
+               password,
+               balance,
+               `limit`,
+               sex
+        FROM account
+        WHERE card = #{cardNumber};
+    </select>
+
+    <!-- 更新余额 -->
+    <update id="updateBalance">
+        UPDATE account
+        SET balance = #{balance}
+        WHERE card = #{cardNumber};
+    </update>
+
+</mapper>
