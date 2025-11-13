@@ -9,4 +9,5 @@ public interface AccountService {
     boolean withdraw(String cardNumber, double amount, String password); // 可加密码验证
     boolean transfer(String fromCard, String toCard, double amount, String password);
     Account getInfo(String cardNumber);
+
 }

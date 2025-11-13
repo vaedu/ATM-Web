@@ -34,9 +34,9 @@ export default {
           }
         });
 
-        if (res.data) {
+        if (res.data && res.data.data) {
           // ✅ 存入本地存储
-          localStorage.setItem("account", JSON.stringify(res.data));
+          localStorage.setItem("account", JSON.stringify(res.data.data));
           this.$router.push("/home");
         } else {
           this.errorMessage = "卡号或密码错误";

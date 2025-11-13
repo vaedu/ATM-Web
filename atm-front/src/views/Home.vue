@@ -1,59 +1,79 @@
+<!-- src/views/Home.vue -->
 <template>
-  <div class="home-container">
+  <div class="home">
+    <NavBar />
     <h2>欢迎回来，{{ user ? user.name : '用户' }}</h2>
 
-    <div class="menu">
-      <button>查询余额</button>
-      <button>存款</button>
-      <button>取款</button>
-      <button>转账</button>
-      <button @click="logout">退出登录</button>
+    <div class="records">
+      <h3>最近交易记录</h3>
+      <button @click="fetchRecords">刷新</button>
+      <table v-if="records.length > 0">
+        <thead>
+        <tr>
+          <th>时间</th>
+          <th>类型</th>
+          <th>金额</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(r, i) in records" :key="i">
+          <td>{{ r.date }}</td>
+          <td>{{ r.type }}</td>
+          <td>{{ r.amount }}</td>
+        </tr>
+        </tbody>
+      </table>
+      <p v-else>暂无交易记录。</p>
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+import NavBar from "@/components/NavBar.vue";
+
 export default {
+  components: { NavBar },
   data() {
     return {
-      user: null // 用来存用户信息
-    }
+      user: JSON.parse(localStorage.getItem("account")),
+      records: []
+    };
   },
   mounted() {
-    // 从 localStorage 取登录时保存的信息
-    const account = localStorage.getItem('account')
-    if (account) {
-      this.user = JSON.parse(account)
+    this.fetchRecords();
+  },
+  methods: {
+    async fetchRecords() {
+      try {
+        const res = await axios.get(`http://localhost:8090/api/atm/records`, {
+          params: { card: this.user.card }
+        });
+        this.records = res.data || [];
+      } catch (e) {
+        console.error(e);
+        alert("获取交易记录失败！");
+      }
     }
   }
-}
+};
 </script>
 
-
 <style scoped>
-.home-container {
+.home {
   text-align: center;
-  margin-top: 100px;
-  font-family: "Microsoft YaHei",serif;
+  padding: 20px;
 }
-.menu {
+.records {
   margin-top: 30px;
-  display: flex;
-  flex-direction: column;
-  width: 200px;
-  margin-left: auto;
-  margin-right: auto;
 }
-button {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  background: #67c23a;
-  color: white;
-  cursor: pointer;
+table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  width: 70%;
 }
-button:hover {
-  background: #85ce61;
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
 }
 </style>

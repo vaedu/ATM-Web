@@ -13,25 +13,28 @@ public class AccountServiceImpl implements AccountService {
     private AccountMapper mapper; // 如果用内存 DataBase，mapper 可能为 null
 
     private String generateCard() {
-        return "62" + (System.currentTimeMillis() % 100000000L);
+        // 银行卡号一般以 62 开头，后面随机生成14位，共16位
+        StringBuilder sb = new StringBuilder("62");
+        for (int i = 0; i < 14; i++) {
+            sb.append((int)(Math.random() * 10));
+        }
+        return sb.toString();
     }
+
 
     @Override
     public Account register(Account account) {
         if (account.getCard() == null || account.getCard().isEmpty()) {
-            account.setCard(generateCard());
+            String card;
+            do {
+                card = generateCard();
+            } while (mapper != null && mapper.findByCardNumber(card) != null);
+            account.setCard(card);
         }
         mapper.insert(account);
         return mapper.findByCardNumber(account.getCard());
-//        if (account.getBalance() == 0.0) account.setBalance(0.0);
-//        if (mapper != null) {
-//            mapper.insert(account);
-//            return mapper.findByCardNumber(account.getCard());
-//        } else {
-//            return account;
-//        }
-
     }
+
 
 
     @Override

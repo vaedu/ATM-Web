@@ -9,8 +9,8 @@
       <option value="女">女</option>
     </select>
 
-    <input type="password" v-model="password" placeholder="请输入密码">
-    <input type="password" v-model="confirmPassword" placeholder="请再次确认密码">
+    <input type="password" v-model="password" placeholder="请输入6位数字密码">
+    <input type="password" v-model="confirmPassword" placeholder="请确认密码">
 
     <input type="number" v-model="balance" placeholder="请输入存款金额">
     <input type="number" v-model="limit" placeholder="请输入每日取款限额">
@@ -48,8 +48,9 @@ export default {
           }
         });
 
-        if (res.data && res.data.card) {
-          localStorage.setItem('account', JSON.stringify(res.data));
+        if (res.data && res.data.data) {
+          localStorage.setItem('account', JSON.stringify(res.data.data));
+          alert(`开户成功！您的卡号是：${res.data.data.card}\n请妥善保管。点击确定进入主页。`);
           this.$router.push('/home');
         } else {
           this.errorMessage = "开户失败，请检查信息是否填写正确";
