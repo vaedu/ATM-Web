@@ -1,0 +1,172 @@
+/* ===============================
+   通用布局
+   =============================== */
+.home-container {
+    width: 100%;
+    min-height: 100vh;
+    background: #f5f7fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: "Inter", "Microsoft YaHei", sans-serif;
+}
+
+/* ===============================
+   顶部栏
+   =============================== */
+.home-header {
+    width: 100%;
+    background: linear-gradient(90deg, #005bea, #00c6fb);
+    padding: 28px 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    box-sizing: border-box;
+}
+
+.home-header .title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.home-header .logout-btn {
+    background: white;
+    color: #005bea;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: 0.25s;
+}
+
+.home-header .logout-btn:hover {
+    background: #e8f0ff;
+}
+
+/* ===============================
+   功能区卡片
+   =============================== */
+.home-content {
+    margin-top: 30px;
+    width: 92%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+.action-card {
+    background: white;
+    padding: 26px;
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    transition: 0.25s;
+    cursor: pointer;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+    background: #f0f7ff;
+}
+
+/* ===============================
+   交易记录
+   =============================== */
+.record-section {
+    width: 92%;
+    max-width: 900px;
+    margin-top: 38px;
+}
+
+.record-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: #333;
+}
+
+.record-card {
+    background: white;
+    padding: 18px 20px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.record-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.record-bottom {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 金额颜色 */
+.amount-plus {
+    color: #0ea200;
+}
+
+.amount-minus {
+    color: #d60000;
+}
+
+/* ===============================
+   响应式布局
+   =============================== */
+
+/* 平板 */
+@media (max-width: 900px) {
+    .home-content {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* 手机 */
+@media (max-width: 600px) {
+    .home-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+
+    .home-header .title {
+        font-size: 24px;
+    }
+
+    .home-content {
+        grid-template-columns: 1fr; /* 改为单列 */
+    }
+
+    .action-card {
+        padding: 22px;
+        font-size: 17px;
+    }
+
+    .record-card {
+        padding: 14px 16px;
+    }
+}
+
+/* 超小屏幕 */
+@media (max-width: 380px) {
+    .home-header .title {
+        font-size: 20px;
+    }
+
+    .action-card {
+        font-size: 16px;
+    }
+}

@@ -1,44 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
-// 引入页面组件
 import Login from '../views/Login.vue'
-import Home from '../views/Home.vue'
 import Register from '../views/Register.vue'
+import Home from '../views/Home.vue'
 import Info from '../views/Info.vue'
+import Deposit from '../views/Deposit.vue'
+import Withdraw from '../views/Withdraw.vue'
+import Transfer from '../views/Transfer.vue'
+
+const routes = [
+    { path: '/', component: Login },
+    { path: '/login', component: Login },
+    { path: '/register', component: Register },
+    { path: '/home', component: Home },
+    { path: '/info', component: Info },
+    { path: '/deposit', component: Deposit },
+    { path: '/withdraw', component: Withdraw },
+    { path: '/transfer', component: Transfer }
+]
 
 const router = createRouter({
     history: createWebHistory(),
-    routes: [
-        {
-            path: '/',
-            redirect: '/login' // 默认跳转到登录页
-        },
-        {
-            path: '/login',
-            name: 'Login',
-            component: Login
-        },
-        {
-            path: '/home',
-            name: 'Home',
-            component: Home
-            // 📘 交易记录部分将直接在 Home.vue 内嵌展示，不需要单独路由
-        },
-        {
-            path: '/register',
-            name: 'Register',
-            component: Register
-        },
-        {
-            path: '/info',
-            name: 'Info',
-            component: Info
-        },
-        {
-            path: '/:pathMatch(.*)*', // 兜底处理不存在的路由
-            redirect: '/login'
-        }
-    ]
+    routes
 })
 
 export default router

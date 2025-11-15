@@ -1,79 +1,62 @@
-<!-- src/views/Home.vue -->
 <template>
-  <div class="home">
-    <NavBar />
-    <h2>欢迎回来，{{ user ? user.name : '用户' }}</h2>
+  <div class="container">
+    <NavBar/>
+    <div class="card" style="margin-top:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <div class="h1">欢迎回来，{{ user ? user.name : '用户' }}</div>
+          <div style="color:var(--muted);margin-top:6px">卡号：{{ maskCard(user?.card) }}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800;font-size:20px">{{ user ? Number(user.balance).toFixed(2) : '0.00' }} 元</div>
+          <div style="color:var(--muted)">本日限额：{{ user ? Number(user.limit).toFixed(2) : '0.00' }} 元</div>
+        </div>
+      </div>
+    </div>
 
-    <div class="records">
-      <h3>最近交易记录</h3>
-      <button @click="fetchRecords">刷新</button>
-      <table v-if="records.length > 0">
-        <thead>
-        <tr>
-          <th>时间</th>
-          <th>类型</th>
-          <th>金额</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="(r, i) in records" :key="i">
-          <td>{{ r.date }}</td>
-          <td>{{ r.type }}</td>
-          <td>{{ r.amount }}</td>
-        </tr>
-        </tbody>
-      </table>
-      <p v-else>暂无交易记录。</p>
+    <div class="home-content" style="margin-top:18px">
+      <div class="action-card" @click="$router.push('/deposit')">存款</div>
+      <div class="action-card" @click="$router.push('/withdraw')">取款</div>
+      <div class="action-card" @click="$router.push('/transfer')">转账</div>
+      <div class="action-card" @click="$router.push('/info')">账户信息</div>
+    </div>
+
+    <div class="record-section">
+      <TransactionList :list="records" @refresh="loadRecords"/>
     </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
-import NavBar from "@/components/NavBar.vue";
-
+import NavBar from '@/components/NavBar.vue';
+import TransactionList from '@/components/TransactionList.vue';
+import axios from 'axios';
 export default {
-  components: { NavBar },
-  data() {
-    return {
-      user: JSON.parse(localStorage.getItem("account")),
-      records: []
-    };
+  components:{NavBar, TransactionList},
+  data(){ return { user:null, records:[] } },
+  created(){
+    const s = localStorage.getItem('account');
+    this.user = s ? JSON.parse(s) : null;
+    if(!this.user) this.$router.push('/login');
+    else this.loadRecords();
   },
-  mounted() {
-    this.fetchRecords();
-  },
-  methods: {
-    async fetchRecords() {
-      try {
-        const res = await axios.get(`http://localhost:8090/api/atm/records`, {
-          params: { card: this.user.card }
-        });
-        this.records = res.data || [];
-      } catch (e) {
-        console.error(e);
-        alert("获取交易记录失败！");
+  methods:{
+    maskCard(c){ if(!c) return ''; const s = String(c); return s.slice(0,4) + ' **** ' + s.slice(-4); },
+    async loadRecords(){
+      if(!this.user) return;
+      try{
+        const res = await axios.get('http://localhost:8090/api/transactions/list',{ params:{ card:this.user.card }});
+        this.records = (res.data || []).slice(0,5);
+      }catch(e){
+        console.error('加载交易记录失败：', e);
+        this.records = [];
       }
     }
   }
-};
+}
 </script>
 
 <style scoped>
-.home {
-  text-align: center;
-  padding: 20px;
-}
-.records {
-  margin-top: 30px;
-}
-table {
-  margin: 0 auto;
-  border-collapse: collapse;
-  width: 70%;
-}
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-}
+.home-content{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:20px }
+@media(max-width:600px){ .home-content{ grid-template-columns:1fr } }
 </style>

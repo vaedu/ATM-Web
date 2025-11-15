@@ -1,0 +1,94 @@
+/* global.css - 全局变量与基础重置 */
+:root{
+    --bank-deep: #1E40AF;       /* 主题深蓝 */
+    --bank-tech: #2563EB;       /* 科技蓝 */
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --muted: #6B7280;
+    --accent: linear-gradient(90deg, var(--bank-deep), var(--bank-tech));
+    --success: #0ea200;
+    --danger: #d60000;
+    --radius: 12px;
+    --shadow: 0 6px 18px rgba(16,24,40,0.08);
+    --font: "Inter", "Microsoft YaHei", sans-serif;
+}
+
+/* reset */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#app{height:100%}
+body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:#111827;
+    -webkit-font-smoothing:antialiased;
+}
+
+/* 通用容器 */
+.container{
+    width:92%;
+    max-width:1100px;
+    margin:0 auto;
+    padding:20px 0;
+}
+
+/* 主题按钮 */
+.btn {
+    display:inline-block;
+    padding:10px 18px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    background:var(--accent);
+    color:white;
+    font-weight:600;
+    transition:all .18s ease;
+}
+.btn.secondary{
+    background:transparent;
+    border:1px solid rgba(30,64,175,0.12);
+    color:var(--bank-deep);
+}
+.btn.ghost{
+    background:#fff;
+    color:var(--bank-deep);
+    box-shadow:var(--shadow);
+}
+.input{
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid #e6eefc;
+    background:#fff;
+    outline:none;
+    transition:border-color .15s;
+}
+.input:focus{
+    border-color:var(--bank-tech);
+    box-shadow:0 6px 18px rgba(37,99,235,0.06);
+}
+
+/* 卡片 */
+.card{
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow:var(--shadow);
+}
+
+/* 标题 */
+.h1{
+    font-size:22px;
+    color:var(--bank-deep);
+    font-weight:700;
+    margin-bottom:10px;
+}
+.h2{
+    font-size:18px;
+    font-weight:700;
+    color:#111827;
+}
+
+/* 小屏优化 */
+@media (max-width: 900px){
+    .container{width:94%}
+}

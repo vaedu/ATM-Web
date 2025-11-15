@@ -1,9 +1,9 @@
 package com.example.atm.service;
 
-import com.example.atm.entity.TransactionRecord;
+import com.example.atm.entity.Transaction;
 import java.util.List;
 
 public interface TransactionService {
-    void addRecord(TransactionRecord record);
-    List<TransactionRecord> getRecordsByCard(String card);
+    void record(String card, String type, double amount, String remark);
+    List<Transaction> list(String card);
 }

@@ -1,39 +1,51 @@
 <template>
-  <div class="page">
-    <NavBar />
-    <h2>账户存款</h2>
-
-    <input type="number" v-model="amount" placeholder="请输入存款金额" />
-    <button @click="deposit">确认存款</button>
+  <div class="container">
+    <NavBar/>
+    <div class="card" style="max-width:520px;margin:20px auto">
+      <div class="h1">存款</div>
+      <input class="input" v-model.number="amount" type="number" min="0.01" placeholder="金额 (元)"/>
+      <div style="height:14px"></div>
+      <button class="btn" @click="doDeposit">确认存款</button>
+      <p v-if="msg" :style="{color: msgErr? 'var(--danger)':'var(--success)'}">{{msg}}</p>
+    </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
-import NavBar from "@/components/NavBar.vue";
-
+import NavBar from '@/components/NavBar.vue';
+import axios from 'axios';
 export default {
-  components: { NavBar },
-  data() {
-    return { amount: "", user: JSON.parse(localStorage.getItem("account")) };
-  },
-  methods: {
-    async deposit() {
-      if (this.amount <= 0) return alert("金额必须大于0！");
+  components:{NavBar},
+  data(){ return { amount:null, msg:'', msgErr:false, user: JSON.parse(localStorage.getItem('account')) } },
+  methods:{
+    async doDeposit(){
+      this.err = '';
+      if (!this.card || !this.amount) {
+        this.err = '请填写卡号和存款金额';
+        return;
+      }
+
       try {
-        const res = await axios.post("http://localhost:8090/api/atm/deposit", null, {
-          params: { card: this.user.card, amount: this.amount }
-        });
-        alert(res.data.message || "存款成功！");
-      } catch {
-        alert("操作失败！");
+        const res = await axios.post('http://localhost:8090/api/atm/deposit',
+            {
+              card: this.card,
+              amount: this.amount
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+
+        if (res.data) {
+          this.$router.push('/home');  // 存款成功后跳转到首页
+        } else {
+          this.err = '存款失败，请重试';
+        }
+      } catch (e) {
+        this.err = '服务器连接失败';
       }
     }
   }
-};
+}
 </script>
-
-<style scoped>
-.page { text-align: center; padding: 20px; }
-input { margin: 10px; padding: 5px; }
-</style>

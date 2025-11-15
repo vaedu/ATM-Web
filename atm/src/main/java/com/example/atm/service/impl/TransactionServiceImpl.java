@@ -1,6 +1,6 @@
 package com.example.atm.service.impl;
 
-import com.example.atm.entity.TransactionRecord;
+import com.example.atm.entity.Transaction;
 import com.example.atm.mapper.TransactionMapper;
 import com.example.atm.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +15,18 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionMapper mapper;
 
     @Override
-    public void addRecord(TransactionRecord record) {
-        if (mapper != null) mapper.insert(record);
+    public void record(String card, String type, double amount, String remark) {
+        if (mapper == null) return;
+        Transaction tx = new Transaction();
+        tx.setCard(card);
+        tx.setType(type);
+        tx.setAmount(amount);
+        tx.setRemark(remark);
+        mapper.insert(tx);
     }
 
     @Override
-    public List<TransactionRecord> getRecordsByCard(String card) {
+    public List<Transaction> list(String card) {
         return mapper != null ? mapper.findByCard(card) : List.of();
     }
 }

@@ -7,10 +7,10 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface AccountMapper {
 
-    int insert(Account account);
+    int insert(Account a);
 
-    Account findByCardNumber(@Param("cardNumber") String cardNumber);
+    Account findByCardNumber(@Param("card") String card);
 
-    int updateBalance(@Param("cardNumber") String cardNumber,
+    int updateBalance(@Param("card") String card,
                       @Param("balance") double balance);
 }
