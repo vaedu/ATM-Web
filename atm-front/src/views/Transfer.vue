@@ -23,23 +23,46 @@ export default {
   data(){ return { toCard:'', amount:null, password:'', msg:'', msgErr:false, user: JSON.parse(localStorage.getItem('account')) } },
   methods:{
     async doTransfer(){
-      this.msg=''; this.msgErr=false;
-      if(!this.toCard || !this.amount){ this.msg='请填写完整信息'; this.msgErr=true; return; }
-      if(!this.password){ this.msg='请输入密码'; this.msgErr=true; return; }
-      try{
-        const res = await axios.post('http://localhost:8090/api/atm/transfer', null, { params:{
-            fromCard:this.user.card, toCard:this.toCard, amount:this.amount, password:this.password
-          }});
-        if(res.data === true || (res.data && res.data.success)) {
-          this.msg='转账成功';
-          this.user.balance = Number(this.user.balance) - Number(this.amount);
-          localStorage.setItem('account', JSON.stringify(this.user));
-        } else {
-          this.msg='转账失败';
-          this.msgErr=true;
-        }
-      }catch(e){ this.msg='服务器错误'; this.msgErr=true }
+      this.msg='';
+      this.msgErr=false;
+
+      const acc = JSON.parse(localStorage.getItem("account"));
+      if (!acc) {
+        this.err = "未登录，请重新登录";
+        return;
+      }
+
+      try {
+        const res = await axios.post("http://localhost:8090/api/atm/transfer", {
+          fromCard: acc.card,
+          toCard: this.toCard,
+          password: this.password,
+          amount: this.amount
+        });
+
+        this.msg = "转账成功！";
+      } catch (e) {
+        this.err = "转账失败：" + (e.response?.data || '');
+      }
     }
   }
 }
 </script>
+/**
+this.msg=''; this.msgErr=false;
+if(!this.toCard || !this.amount){ this.msg='请填写完整信息'; this.msgErr=true; return; }
+if(!this.password){ this.msg='请输入密码'; this.msgErr=true; return; }
+try{
+const res = await axios.post('http://localhost:8090/api/atm/transfer', null, { params:{
+fromCard:this.user.card, toCard:this.toCard, amount:this.amount, password:this.password
+}});
+if(res.data === true || (res.data && res.data.success)) {
+this.msg='转账成功';
+this.user.balance = Number(this.user.balance) - Number(this.amount);
+localStorage.setItem('account', JSON.stringify(this.user));
+} else {
+this.msg='转账失败';
+this.msgErr=true;
+}
+}catch(e){ this.msg='服务器错误'; this.msgErr=true }
+**/

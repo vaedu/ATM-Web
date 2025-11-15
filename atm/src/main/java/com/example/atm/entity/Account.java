@@ -11,7 +11,5 @@ public class Account {
     private String name;
     private String password;
     private double balance;
-    private double limit;
-    private String sex;
 
 }

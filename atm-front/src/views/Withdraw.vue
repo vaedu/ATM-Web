@@ -22,31 +22,24 @@ export default {
   methods:{
     async doWithdraw(){
       this.err = '';
-      if (!this.card || !this.amount || !this.password) {
-        this.err = '请填写卡号、取款金额和密码';
+      this.success = '';
+
+      const acc = JSON.parse(localStorage.getItem("account"));
+      if (!acc) {
+        this.err = "未登录，请重新登录";
         return;
       }
 
       try {
-        const res = await axios.post('http://localhost:8090/api/atm/withdraw',
-            {
-              card: this.card,
-              amount: this.amount,
-              password: this.password
-            },
-            {
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
+        const res = await axios.post("http://localhost:8090/api/atm/withdraw", {
+          card: acc.card,
+          password: this.password,
+          amount: this.amount
+        });
 
-        if (res.data) {
-          this.$router.push('/home');  // 取款成功后跳转到首页
-        } else {
-          this.err = '取款失败，请重试';
-        }
+        this.success = "取款成功！当前余额：" + res.data;
       } catch (e) {
-        this.err = '服务器连接失败';
+        this.err = "取款失败：" + (e.response?.data || '');
       }
     }
   }

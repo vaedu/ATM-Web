@@ -4,13 +4,13 @@
 
 <mapper namespace="com.example.atm.mapper.TransactionMapper">
 
-    <insert id="insert">
-        INSERT INTO transaction(card, type, amount, time)
-        VALUES (#{card}, #{type}, #{amount}, #{time})
+    <insert id="insert" parameterType="com.example.atm.entity.Transaction">
+        INSERT INTO transaction (card, type, amount, remark, time)
+        VALUES (#{card}, #{type}, #{amount}, #{remark}, #{time})
     </insert>
 
-    <select id="findByCard" resultType="com.example.atm.entity.Transaction">
-        SELECT id, card, type, amount, time
+    <select id="findByCard" resultType="com.example.atm.entity.Transaction" parameterType="String">
+        SELECT id, card, type, amount, remark, time
         FROM transaction
         WHERE card = #{card}
         ORDER BY time DESC

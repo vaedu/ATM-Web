@@ -4,20 +4,27 @@
 
 <mapper namespace="com.example.atm.mapper.AccountMapper">
 
-    <insert id="insert">
-        INSERT INTO account(card, name, password, balance, `limit`, sex)
-        VALUES (#{card}, #{name}, #{password}, #{balance}, #{limit}, #{sex});
-    </insert>
-
-    <select id="findByCardNumber" resultType="com.example.atm.entity.Account">
-        SELECT card, name, password, balance, `limit`, sex
+    <select id="findByCard" resultType="com.example.atm.entity.Account">
+        SELECT card, name, password, balance
         FROM account
         WHERE card = #{card}
     </select>
 
     <update id="updateBalance">
-        UPDATE account SET balance = #{balance}
+        UPDATE account
+        SET balance = #{balance}
         WHERE card = #{card}
     </update>
+
+    <update id="updatePassword">
+        UPDATE account
+        SET password = #{password}
+        WHERE card = #{card}
+    </update>
+
+    <insert id="insert" parameterType="com.example.atm.entity.Account">
+        INSERT INTO account (card, name, password, balance)
+        VALUES (#{card}, #{name}, #{password}, #{balance})
+    </insert>
 
 </mapper>

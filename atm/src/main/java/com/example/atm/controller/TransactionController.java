@@ -1,7 +1,7 @@
 package com.example.atm.controller;
 
 import com.example.atm.entity.Transaction;
-import com.example.atm.service.TransactionService;
+import com.example.atm.mapper.TransactionMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,13 +11,14 @@ import java.util.List;
 @CrossOrigin
 public class TransactionController {
 
-    private final TransactionService service;
-    public TransactionController(TransactionService service) {
-        this.service = service;
+    private final TransactionMapper mapper;
+
+    public TransactionController(TransactionMapper mapper) {
+        this.mapper = mapper;
     }
 
     @GetMapping("/list")
     public List<Transaction> list(@RequestParam String card) {
-        return service.list(card);
+        return mapper.findByCard(card);
     }
 }
