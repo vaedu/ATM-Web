@@ -1,20 +1,21 @@
 package com.example.atm.service;
 
+import com.example.atm.dto.*;
 import com.example.atm.entity.Account;
 
 public interface AccountService {
 
+    Account login(String card, String password);
+
     Account register(Account account);
 
-    Account login(String cardNumber, String password);
+    double deposit(DepositRequest req);
 
-    boolean deposit(String cardNumber, double amount);
+    double withdraw(WithdrawRequest req);
 
-    boolean withdraw(String cardNumber, double amount, String password);
-
-    boolean transfer(String fromCard, String toCard, double amount, String password);
+    void transfer(TransferRequest req);
 
     boolean changePassword(String card, String oldPwd, String newPwd);
 
-    Account getInfo(String cardNumber);
+    Account getInfo(String card);
 }

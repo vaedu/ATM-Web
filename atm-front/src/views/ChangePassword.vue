@@ -33,11 +33,12 @@ export default {
       this.msg=''
       const acc = JSON.parse(localStorage.getItem("account"))
 
-      const res = await axios.post("http://localhost:8090/api/atm/change-password", {
-        card: acc.card,
+      const res = await axios.post("http://localhost:8090/api/atm/changePassword", {
+        card: account.card,
         oldPwd: this.oldPwd,
         newPwd: this.newPwd
-      })
+      });
+
 
       if(res.data){
         this.msg="修改成功！"

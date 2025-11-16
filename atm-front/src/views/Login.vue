@@ -25,6 +25,7 @@ import axios from 'axios';
 export default {
   components:{NavBar},
   data(){ return { card:'', password:'', err:'' } },
+
   methods:{
     async onLogin() {
       this.err = '';
@@ -35,7 +36,7 @@ export default {
       }
 
       try {
-        const res = await axios.post('http://localhost:8090/api/atm/login', {
+        const res = await axios.post("http://localhost:8090/api/atm/login", {
           card: this.card,
           password: this.password
         });
@@ -51,6 +52,7 @@ export default {
         this.err = '服务器连接失败或账号密码错误';
       }
     }
+
   }
 }
 </script>

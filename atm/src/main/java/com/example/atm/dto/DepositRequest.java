@@ -1,12 +1,9 @@
 package com.example.atm.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Setter
-@Getter
+@Data
 public class DepositRequest {
     private String card;
     private double amount;
-
 }

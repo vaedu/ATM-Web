@@ -36,11 +36,12 @@ export default {
       const acc = JSON.parse(localStorage.getItem("account"))
 
       try{
-        const res = await axios.post("http://localhost:8090/api/atm/withdraw", {
-          card: acc.card,
-          amount: Number(this.amount),
+        const res = await axiosaxios.post("http://localhost:8090/api/atm/withdraw", {
+          card: account.card,
+          amount: this.amount,
           password: this.password
-        })
+        });
+
         if(res.data){
           this.msg="取款成功！"
         }

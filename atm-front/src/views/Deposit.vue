@@ -31,9 +31,9 @@ export default {
 
       try{
         const res = await axios.post("http://localhost:8090/api/atm/deposit", {
-          card: acc.card,
-          amount: Number(this.amount)
-        })
+          card: account.card,
+          amount: this.amount
+        });
         if(res.data){
           this.msg="存款成功！"
         }

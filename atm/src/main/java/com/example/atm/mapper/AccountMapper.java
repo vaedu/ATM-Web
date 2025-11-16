@@ -24,8 +24,7 @@ public interface AccountMapper {
      * 修改密码（通过 oldPassword 校验）
      * 返回受影响行数，方便判断是否修改成功
      */
-    @Update("UPDATE account SET password = #{newPassword} WHERE card = #{card} AND password = #{oldPassword}")
-    int updatePassword(@Param("card") String card,
-                       @Param("oldPassword") String oldPassword,
-                       @Param("newPassword") String newPassword);
+    @Update("UPDATE account SET password = #{newPwd} WHERE card = #{card}")
+    void updatePassword(@Param("card") String card,
+                        @Param("newPwd") String newPwd);
 }

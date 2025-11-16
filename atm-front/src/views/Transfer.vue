@@ -36,11 +36,11 @@ export default {
 
       try{
         const res = await axios.post("http://localhost:8090/api/atm/transfer", {
-          fromCard: acc.card,
+          fromCard: account.card,
           toCard: this.toCard,
-          amount: Number(this.amount),
+          amount: this.amount,
           password: this.password
-        })
+        });
         if(res.data){
           this.msg="转账成功！"
         }
