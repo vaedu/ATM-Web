@@ -46,10 +46,10 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public Account login(@RequestParam String card,
-                         @RequestParam String password) {
-        return service.login(card, password);
+    public Account login(@RequestBody Account req) {
+        return service.login(req.getCard(), req.getPassword());
     }
+
 
     @PostMapping("/deposit")
     public boolean deposit(@RequestParam String card,

@@ -6,6 +6,7 @@ import Info from '../views/Info.vue'
 import Deposit from '../views/Deposit.vue'
 import Withdraw from '../views/Withdraw.vue'
 import Transfer from '../views/Transfer.vue'
+import ChangePassword from "@/views/ChangePassword.vue";
 
 const routes = [
     { path: '/', component: Login },
@@ -15,7 +16,8 @@ const routes = [
     { path: '/info', component: Info },
     { path: '/deposit', component: Deposit },
     { path: '/withdraw', component: Withdraw },
-    { path: '/transfer', component: Transfer }
+    { path: '/transfer', component: Transfer },
+    { path: '/change-password', component: ChangePassword },
 ]
 
 const router = createRouter({

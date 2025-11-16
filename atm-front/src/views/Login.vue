@@ -28,21 +28,17 @@ export default {
   methods:{
     async onLogin() {
       this.err = '';
+
       if (!this.card || !this.password) {
         this.err = '请填写卡号和密码';
         return;
       }
+
       try {
-        const res = await axios.post('http://localhost:8090/api/atm/login',
-            {
-              card: this.card,
-              password: this.password
-            },
-            {
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
+        const res = await axios.post('http://localhost:8090/api/atm/login', {
+          card: this.card,
+          password: this.password
+        });
 
         if (res.data && res.data.card) {
           localStorage.setItem('account', JSON.stringify(res.data));
@@ -51,11 +47,10 @@ export default {
           this.err = '登录失败：卡号或密码错误';
         }
       } catch (e) {
-        this.err = '服务器连接失败';
+        console.log(e);
+        this.err = '服务器连接失败或账号密码错误';
       }
     }
-
-
   }
 }
 </script>

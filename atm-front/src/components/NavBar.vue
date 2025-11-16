@@ -1,57 +1,56 @@
 <template>
-  <nav class="navbar">
-    <div class="logo">ATM 自助服务</div>
+  <nav class="nav">
+    <div class="left" @click="$router.push('/home')">🏦 ATM 系统</div>
 
-    <div class="nav-right">
-      <router-link to="/home" class="nav-item">首页</router-link>
-      <router-link to="/info" class="nav-item">账户</router-link>
-      <span class="nav-item" @click="logout">退出登录</span>
+    <div class="right">
+      <span v-if="account">卡号：{{ account.card }}</span>
+      <button class="logout" @click="logout">退出</button>
     </div>
   </nav>
 </template>
 
 <script>
 export default {
+  computed:{
+    account(){
+      const a = localStorage.getItem("account");
+      return a ? JSON.parse(a) : null;
+    }
+  },
   methods:{
     logout(){
-      localStorage.removeItem('account');
-      this.$router.push('/');
+      localStorage.removeItem("account");
+      this.$router.push("/");
     }
   }
 }
 </script>
 
 <style scoped>
-.navbar {
-  height: 56px;
-  background: #1a73e8;
-  color: white;
+.nav{
+  height: 60px;
+  background: var(--theme);
+  color:white;
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  padding: 0 20px;
-  border-radius: 8px;
-  margin: 12px;
+  align-items:center;
+  padding: 0 16px;
+  font-size:18px;
 }
-
-.logo {
+.left{
+  cursor:pointer;
   font-weight: bold;
-  font-size: 18px;
 }
-
-.nav-right {
-  display: flex;
-  gap: 20px;
+.right{
+  display:flex;
+  gap:12px;
+  align-items:center;
 }
-
-.nav-item {
-  color: white;
-  text-decoration: none;
-  cursor: pointer;
-  font-size: 15px;
-}
-
-.nav-item:hover {
-  text-decoration: underline;
+.logout{
+  background:white;
+  color:var(--theme);
+  padding:6px 10px;
+  border-radius:6px;
+  border:none;
 }
 </style>

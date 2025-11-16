@@ -11,13 +11,14 @@
     --radius: 12px;
     --shadow: 0 6px 18px rgba(16,24,40,0.08);
     --font: "Inter", "Microsoft YaHei", sans-serif;
+    --theme: #4a90e2; /* 主色（蓝色主题） */
 }
 
 /* reset */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body,#app{height:100%}
 body{
-    font-family:var(--font);
+    font-family: var(--font), serif;
     background:var(--bg);
     color:#111827;
     -webkit-font-smoothing:antialiased;

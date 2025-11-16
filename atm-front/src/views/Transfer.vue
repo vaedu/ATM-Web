@@ -1,58 +1,52 @@
 <template>
   <div class="container">
     <NavBar/>
-    <div class="card" style="max-width:520px;margin:20px auto">
-      <div class="h1">转账</div>
-      <input class="input" v-model="toCard" placeholder="目标卡号"/>
-      <div style="height:8px"></div>
-      <input class="input" v-model.number="amount" type="number" placeholder="金额 (元)"/>
-      <div style="height:8px"></div>
-      <input class="input" v-model="password" type="password" placeholder="请输入密码"/>
-      <div style="height:12px"></div>
-      <button class="btn" @click="doTransfer">确认转账</button>
-      <p v-if="msg" :style="{color: msgErr? 'var(--danger)':'var(--success)'}">{{msg}}</p>
-      <button class="btn secondary" @click="$router.push('/home')" style="margin-top:20px">
-        返回首页
-      </button>
 
+    <div class="card">
+      <h2>转账</h2>
+
+      <input class="input" v-model="toCard" placeholder="对方卡号"/>
+      <input class="input" v-model="amount" placeholder="金额"/>
+      <input class="input" type="password" v-model="password" placeholder="密码"/>
+
+      <button class="btn" @click="doTransfer">确认转账</button>
+
+      <p v-if="msg" style="margin-top:10px">{{msg}}</p>
+
+      <button class="btn secondary" @click="$router.push('/home')">返回</button>
     </div>
   </div>
 </template>
 
 <script>
-import NavBar from '@/components/NavBar.vue';
-import axios from 'axios';
+import NavBar from '@/components/NavBar.vue'
+import axios from 'axios'
+
 export default {
   components:{NavBar},
-  data(){ return { toCard:'', amount:null, password:'', msg:'', msgErr:false, user: JSON.parse(localStorage.getItem('account')) } },
+  data(){
+    return{
+      toCard:'', amount:'', password:'', msg:''
+    }
+  },
   methods:{
     async doTransfer(){
-      this.msg='';
-      this.msgErr=false;
+      this.msg=''
+      const acc = JSON.parse(localStorage.getItem("account"))
 
-      const acc = JSON.parse(localStorage.getItem("account"));
-      if (!acc) {
-        this.err = "未登录，请重新登录";
-        return;
-      }
-
-      try {
+      try{
         const res = await axios.post("http://localhost:8090/api/atm/transfer", {
           fromCard: acc.card,
           toCard: this.toCard,
-          password: this.password,
-          amount: this.amount
-        });
-
-        this.msg = "转账成功！";
-      } catch(e) {
-        if (e.response && e.response.data) {
-          this.err = e.response.data;   // 直接显示后端的错误文本
-        } else {
-          this.err = "服务器错误";
+          amount: Number(this.amount),
+          password: this.password
+        })
+        if(res.data){
+          this.msg="转账成功！"
         }
+      }catch(e){
+        this.msg = e.response?.data || "服务器错误"
       }
-
     }
   }
 }

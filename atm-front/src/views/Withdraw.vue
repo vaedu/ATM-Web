@@ -1,55 +1,52 @@
 <template>
   <div class="container">
     <NavBar/>
-    <div class="card" style="max-width:520px;margin:20px auto">
-      <div class="h1">取款</div>
-      <input class="input" v-model.number="amount" type="number" min="0.01" placeholder="金额 (元)"/>
-      <div style="height:8px"></div>
-      <input class="input" v-model="password" type="password" placeholder="请输入密码"/>
-      <div style="height:14px"></div>
-      <button class="btn" @click="doWithdraw">确认取款</button>
-      <button class="btn secondary" @click="$router.push('/home')" style="margin-top:20px">
-        返回首页
-      </button>
 
-      <p v-if="msg" :style="{color: msgErr? 'var(--danger)':'var(--success)'}">{{msg}}</p>
+    <div class="card">
+      <h2>取款</h2>
+
+      <input class="input" v-model="amount" placeholder="金额"/>
+      <input class="input" type="password" v-model="password" placeholder="密码"/>
+      <button class="btn" @click="doWithdraw">确认取款</button>
+
+      <p v-if="msg" style="margin-top:10px">{{msg}}</p>
+
+      <button class="btn secondary" @click="$router.push('/home')">返回</button>
     </div>
   </div>
 </template>
 
 <script>
-import NavBar from '@/components/NavBar.vue';
-import axios from 'axios';
+import NavBar from '@/components/NavBar.vue'
+import axios from 'axios'
+
 export default {
   components:{NavBar},
-  data(){ return { amount:null, password:'', msg:'', msgErr:false, user: JSON.parse(localStorage.getItem('account')) } },
-  methods: {
-    async doWithdraw() {
-      this.err = '';
-      this.success = '';
+  data(){
+    return{
+      amount:'',
+      password:'',
+      msg:''
+    }
+  },
+  methods:{
+    async doWithdraw(){
+      this.msg=''
 
-      const acc = JSON.parse(localStorage.getItem("account"));
-      if (!acc) {
-        this.err = "未登录，请重新登录";
-        return;
-      }
+      const acc = JSON.parse(localStorage.getItem("account"))
 
-      try {
+      try{
         const res = await axios.post("http://localhost:8090/api/atm/withdraw", {
           card: acc.card,
-          password: this.password,
-          amount: this.amount
-        });
-
-        this.success = "取款成功！当前余额：" + res.data;
-      } catch (e) {
-        if (e.response && e.response.data) {
-          this.err = e.response.data;   // 直接显示后端的错误文本
-        } else {
-          this.err = "服务器错误";
+          amount: Number(this.amount),
+          password: this.password
+        })
+        if(res.data){
+          this.msg="取款成功！"
         }
+      }catch(e){
+        this.msg = e.response?.data || "服务器错误"
       }
-
     }
   }
 }
