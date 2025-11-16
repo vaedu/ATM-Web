@@ -1,129 +1,167 @@
 package com.example.atm.service.impl;
 
-import com.example.atm.dto.DepositRequest;
-import com.example.atm.dto.TransferRequest;
-import com.example.atm.dto.WithdrawRequest;
 import com.example.atm.entity.Account;
 import com.example.atm.entity.Transaction;
 import com.example.atm.mapper.AccountMapper;
 import com.example.atm.mapper.TransactionMapper;
 import com.example.atm.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class AccountServiceImpl implements AccountService {
 
-    private final AccountMapper accountMapper;
-    private final TransactionMapper transactionMapper;
+    @Autowired(required = false)
+    private AccountMapper accountMapper;
 
-    public AccountServiceImpl(AccountMapper accountMapper, TransactionMapper transactionMapper) {
-        this.accountMapper = accountMapper;
-        this.transactionMapper = transactionMapper;
-    }
+    // 如果你的项目中有 TransactionMapper（插入交易记录），会被注入；否则为 null
+    @Autowired(required = false)
+    private TransactionMapper transactionMapper;
 
-    @Override
-    public Account login(String card, String password) {
-        Account a = accountMapper.findByCard(card);
-        if (a == null || !a.getPassword().equals(password)) {
-            return null;
+    // 生成 16 位纯数字银行卡号（以6222开头）
+    private String generateCard() {
+        StringBuilder sb = new StringBuilder("6222");
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+        while (sb.length() < 16) {
+            sb.append(rnd.nextInt(0, 10));
         }
-        return a;
+        return sb.toString();
     }
 
     @Override
     public Account register(Account account) {
-        accountMapper.insert(account);
-        return account;
+        // 若无卡号则生成，确保唯一（简单重试）
+        if (account.getCard() == null || account.getCard().isEmpty()) {
+            String card;
+            do {
+                card = generateCard();
+            } while (accountMapper != null && accountMapper.findByCard(card) != null);
+            account.setCard(card);
+        }
+
+        if (account.getBalance() == 0.0) account.setBalance(0.0);
+
+        if (accountMapper != null) {
+            accountMapper.insert(account);
+            // 返回数据库中的对象（为了确保字段一致）
+            return accountMapper.findByCard(account.getCard());
+        } else {
+            // 如果没有 mapper（例如你正在使用内存 DB），直接返回对象
+            return account;
+        }
     }
 
     @Override
-    public double deposit(DepositRequest request) {
-        Account acc = accountMapper.findByCard(request.getCard());
-        if (acc == null) throw new RuntimeException("卡号不存在");
-
-        double newBal = acc.getBalance() + request.getAmount();
-        accountMapper.updateBalance(acc.getCard(), newBal);
-
-        Transaction t = new Transaction();
-        t.setCard(acc.getCard());
-        t.setType("DEPOSIT");
-        t.setAmount(request.getAmount());
-        t.setRemark("存款");
-        t.setTime(LocalDateTime.now());
-        transactionMapper.insert(t);
-
-        return newBal;
+    public Account login(String cardNumber, String password) {
+        if (accountMapper == null) return null;
+        Account acc = accountMapper.findByCard(cardNumber);
+        if (acc != null && acc.getPassword().equals(password)) return acc;
+        return null;
     }
 
     @Override
-    public double withdraw(WithdrawRequest request) {
+    public boolean deposit(String cardNumber, double amount) {
+        if (amount <= 0) return false;
+        if (accountMapper == null) return false;
 
-        Account acc = accountMapper.findByCard(request.getCard());
-        if (acc == null) throw new RuntimeException("卡号不存在");
-        if (!acc.getPassword().equals(request.getPassword())) throw new RuntimeException("密码错误");
-        if (acc.getBalance() < request.getAmount()) throw new RuntimeException("余额不足");
-
-        double newBal = acc.getBalance() - request.getAmount();
-        accountMapper.updateBalance(acc.getCard(), newBal);
-
-        Transaction t = new Transaction();
-        t.setCard(acc.getCard());
-        t.setType("WITHDRAW");
-        t.setAmount(request.getAmount());
-        t.setRemark("取款");
-        t.setTime(LocalDateTime.now());
-        transactionMapper.insert(t);
-
-        return newBal;
-    }
-
-    @Override
-    public void transfer(TransferRequest request) {
-
-        Account from = accountMapper.findByCard(request.getFromCard());
-        Account to = accountMapper.findByCard(request.getToCard());
-
-        if (from == null || to == null) throw new RuntimeException("卡号不存在");
-        if (!from.getPassword().equals(request.getPassword())) throw new RuntimeException("密码错误");
-        if (from.getBalance() < request.getAmount()) throw new RuntimeException("余额不足");
-
-        double newFromBal = from.getBalance() - request.getAmount();
-        double newToBal = to.getBalance() + request.getAmount();
-
-        accountMapper.updateBalance(from.getCard(), newFromBal);
-        accountMapper.updateBalance(to.getCard(), newToBal);
-
-        Transaction t1 = new Transaction();
-        t1.setCard(from.getCard());
-        t1.setType("TRANSFER_OUT");
-        t1.setAmount(request.getAmount());
-        t1.setRemark("转账给 " + to.getCard());
-        t1.setTime(LocalDateTime.now());
-        transactionMapper.insert(t1);
-
-        Transaction t2 = new Transaction();
-        t2.setCard(to.getCard());
-        t2.setType("TRANSFER_IN");
-        t2.setAmount(request.getAmount());
-        t2.setRemark("来自 " + from.getCard());
-        t2.setTime(LocalDateTime.now());
-        transactionMapper.insert(t2);
-    }
-
-    @Override
-    public boolean changePassword(String card, String oldPwd, String newPwd) {
-        Account acc = accountMapper.findByCard(card);
+        Account acc = accountMapper.findByCard(cardNumber);
         if (acc == null) return false;
-        if (!acc.getPassword().equals(oldPwd)) return false;
 
-        accountMapper.updatePassword(card, oldPwd, newPwd);
+        double newBal = acc.getBalance() + amount;
+        accountMapper.updateBalance(cardNumber, newBal);
+
+        // 如果有 transactionMapper，则写入一条交易记录
+        if (transactionMapper != null) {
+            Transaction t = new Transaction();
+            t.setCard(cardNumber);
+            t.setType("DEPOSIT");
+            t.setAmount(amount);
+            t.setRemark("存款");
+            t.setTime(LocalDateTime.now());
+            transactionMapper.insert(t);
+        }
+
         return true;
     }
 
     @Override
-    public Account getInfo(String card) {
-        return accountMapper.findByCard(card);
+    public boolean withdraw(String cardNumber, double amount, String password) {
+        if (amount <= 0) return false;
+        if (accountMapper == null) return false;
+
+        Account acc = accountMapper.findByCard(cardNumber);
+        if (acc == null) return false;
+        if (!acc.getPassword().equals(password)) return false;
+        if (amount > acc.getBalance()) return false;
+        if (amount > acc.getLimit()) return false;
+
+        double newBal = acc.getBalance() - amount;
+        accountMapper.updateBalance(cardNumber, newBal);
+
+        if (transactionMapper != null) {
+            Transaction t = new Transaction();
+            t.setCard(cardNumber);
+            t.setType("WITHDRAW");
+            t.setAmount(amount);
+            t.setRemark("取款");
+            t.setTime(LocalDateTime.now());
+            transactionMapper.insert(t);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean transfer(String fromCard, String toCard, double amount, String password) {
+        if (amount <= 0) return false;
+        if (accountMapper == null) return false;
+
+        Account from = accountMapper.findByCard(fromCard);
+        Account to = accountMapper.findByCard(toCard);
+        if (from == null || to == null) return false;
+        if (!from.getPassword().equals(password)) return false;
+        if (amount > from.getBalance()) return false;
+
+        double newFrom = from.getBalance() - amount;
+        double newTo = to.getBalance() + amount;
+
+        accountMapper.updateBalance(fromCard, newFrom);
+        accountMapper.updateBalance(toCard, newTo);
+
+        if (transactionMapper != null) {
+            Transaction t1 = new Transaction();
+            t1.setCard(fromCard);
+            t1.setType("TRANSFER_OUT");
+            t1.setAmount(amount);
+            t1.setRemark("转账给 " + toCard);
+            t1.setTime(LocalDateTime.now());
+            transactionMapper.insert(t1);
+
+            Transaction t2 = new Transaction();
+            t2.setCard(toCard);
+            t2.setType("TRANSFER_IN");
+            t2.setAmount(amount);
+            t2.setRemark("来自 " + fromCard);
+            t2.setTime(LocalDateTime.now());
+            transactionMapper.insert(t2);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean changePassword(String card, String oldPwd, String newPwd) {
+        if (accountMapper == null) return false;
+        int updated = accountMapper.updatePassword(card, oldPwd, newPwd);
+        return updated > 0;
+    }
+
+    @Override
+    public Account getInfo(String cardNumber) {
+        if (accountMapper == null) return null;
+        return accountMapper.findByCard(cardNumber);
     }
 }

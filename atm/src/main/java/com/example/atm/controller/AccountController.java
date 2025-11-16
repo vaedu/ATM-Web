@@ -1,61 +1,86 @@
 package com.example.atm.controller;
 
-import com.example.atm.dto.DepositRequest;
-import com.example.atm.dto.TransferRequest;
-import com.example.atm.dto.WithdrawRequest;
 import com.example.atm.entity.Account;
 import com.example.atm.service.AccountService;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * ATM REST Controller
+ */
 @RestController
 @RequestMapping("/api/atm")
 @CrossOrigin
 public class AccountController {
 
     private final AccountService service;
-
     public AccountController(AccountService service) {
         this.service = service;
     }
 
-    @PostMapping("/login")
-    public Account login(@RequestBody Account account) {
-        return service.login(account.getCard(), account.getPassword());
+    /**
+     * 开户（前端调用 /open）
+     * 参数：name, password, balance, limit, sex
+     * 返回：Account（包含生成的 card）
+     */
+    @PostMapping("/open")
+    public Account open(@RequestParam String name,
+                        @RequestParam String password,
+                        @RequestParam(required = false, defaultValue = "0") double balance,
+                        @RequestParam(required = false, defaultValue = "1000") double limit,
+                        @RequestParam(required = false, defaultValue = "男") String sex) {
+
+        // 密码规则：6 位纯数字（你之前要求）
+        if (password == null || !password.matches("^\\d{6}$")) {
+            throw new IllegalArgumentException("密码必须是6位纯数字");
+        }
+
+        Account a = new Account();
+        a.setCard(null); // 交由 service 生成
+        a.setName(name);
+        a.setPassword(password);
+        a.setBalance(balance);
+        a.setLimit(limit);
+        a.setSex(sex);
+
+        return service.register(a);
     }
 
-    @PostMapping("/register")
-    public Account register(@RequestBody Account acc) {
-        acc.setBalance(0);
-        return service.register(acc);
+    @PostMapping("/login")
+    public Account login(@RequestParam String card,
+                         @RequestParam String password) {
+        return service.login(card, password);
     }
 
     @PostMapping("/deposit")
-    public double deposit(@RequestBody DepositRequest req) {
-        return service.deposit(req);
+    public boolean deposit(@RequestParam String card,
+                           @RequestParam double amount) {
+        return service.deposit(card, amount);
     }
 
     @PostMapping("/withdraw")
-    public double withdraw(@RequestBody WithdrawRequest req) {
-        return service.withdraw(req);
+    public boolean withdraw(@RequestParam String card,
+                            @RequestParam double amount,
+                            @RequestParam String password) {
+        return service.withdraw(card, amount, password);
     }
 
     @PostMapping("/transfer")
-    public String transfer(@RequestBody TransferRequest req) {
-        service.transfer(req);
-        return "success";
+    public boolean transfer(@RequestParam String fromCard,
+                            @RequestParam String toCard,
+                            @RequestParam double amount,
+                            @RequestParam String password) {
+        return service.transfer(fromCard, toCard, amount, password);
     }
 
-    @PostMapping("/changePassword")
-    public boolean changePassword(
-            @RequestParam String card,
-            @RequestParam String oldPwd,
-            @RequestParam String newPwd
-    ) {
-        return service.changePassword(card, oldPwd, newPwd);
-    }
     @GetMapping("/info")
     public Account info(@RequestParam String card) {
         return service.getInfo(card);
     }
 
+    @PostMapping("/changePassword")
+    public boolean changePassword(@RequestParam String card,
+                                  @RequestParam String oldPassword,
+                                  @RequestParam String newPassword) {
+        return service.changePassword(card, oldPassword, newPassword);
+    }
 }
