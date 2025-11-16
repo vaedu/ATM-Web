@@ -4,6 +4,8 @@ import com.example.atm.entity.Transaction;
 import java.util.List;
 
 public interface TransactionService {
-//    void record(String card, String type, double amount, String remark);
-    List<Transaction> list(String card);
+
+    void record(String card, String type, double amount, String remark);
+
+    List<Transaction> getByCard(String card);
 }

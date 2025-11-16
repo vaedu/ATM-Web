@@ -18,34 +18,45 @@
 </template>
 
 <script>
-import NavBar from '@/components/NavBar.vue';
-import axios from 'axios';
+import axios from "axios";
+import NavBar from "@/components/NavBar.vue";
 
 export default {
-  components:{NavBar},
-  data(){
-    return{
-      oldPwd:'', newPwd:'', msg:''
-    }
+  components: {NavBar},
+  data() {
+    return {
+      oldPwd: "",
+      newPwd: "",
+      msg: ""
+    };
   },
-  methods:{
-    async doChange(){
-      this.msg=''
-      const acc = JSON.parse(localStorage.getItem("account"))
+  methods: {
+    async doChange() {
 
-      const res = await axios.post("http://localhost:8090/api/atm/changePassword", {
-        card: account.card,
-        oldPwd: this.oldPwd,
-        newPwd: this.newPwd
-      });
+      const acc = JSON.parse(localStorage.getItem("account")); // ← 正确的变量
 
+      if (!acc) {
+        this.msg = "请重新登录";
+        return;
+      }
 
-      if(res.data){
-        this.msg="修改成功！"
-      }else{
-        this.msg="旧密码不正确"
+      try {
+        const resp = await axios.post("http://localhost:8090/api/atm/change", {
+          card: acc.card,
+          oldPwd: this.oldPwd,
+          newPwd: this.newPwd
+        });
+
+        if (resp.data.success) {
+          this.msg = "密码修改成功";
+        } else {
+          this.msg = resp.data.message;
+        }
+      } catch (e) {
+        this.msg = "服务器错误";
       }
     }
   }
-}
+};
 </script>
+

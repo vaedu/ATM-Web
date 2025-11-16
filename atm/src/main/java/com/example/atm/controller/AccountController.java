@@ -1,71 +1,87 @@
 package com.example.atm.controller;
 
-import com.example.atm.dto.*;
+import com.example.atm.dto.DepositRequest;
+import com.example.atm.dto.TransferRequest;
+import com.example.atm.dto.WithdrawRequest;
 import com.example.atm.entity.Account;
 import com.example.atm.entity.Transaction;
 import com.example.atm.service.AccountService;
 import com.example.atm.service.TransactionService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/atm")
 public class AccountController {
-
-    private final AccountService accountService;
-    private final TransactionService txService;
-
-    public AccountController(AccountService accountService, TransactionService txService) {
-        this.accountService = accountService;
-        this.txService = txService;
+    @ExceptionHandler(RuntimeException.class)
+    public Map<String, Object> handleRuntime(RuntimeException ex) {
+        Map<String, Object> r = new HashMap<>();
+        r.put("success", false);
+        r.put("message", ex.getMessage());
+        return r;
     }
 
-    // 登录
+    private final AccountService service;
+    private final TransactionService transactionService;
+
+    public AccountController(AccountService service, TransactionService transactionService) {
+        this.service = service;
+        this.transactionService = transactionService;
+    }
+
     @PostMapping("/login")
-    public Account login(@RequestBody LoginRequest req) {
-        return accountService.login(req.getCard(), req.getPassword());
+    public Account login(@RequestBody Account req) {
+        return service.login(req.getCard(), req.getPassword());
     }
 
-    // 自助开户
-    @PostMapping("/register")
-    public Account register(@RequestBody Account acc) {
-        return accountService.register(acc);
-    }
 
-    // 获取账户信息（主页用）
     @GetMapping("/info")
     public Account info(@RequestParam String card) {
-        return accountService.getInfo(card);
+        return service.getInfo(card);
     }
 
-    // 获取交易记录（主页用）
-    @GetMapping("/transactions")
-    public List<Transaction> tx(@RequestParam String card) {
-        return txService.list(card);
-    }
-
-    // 存款
     @PostMapping("/deposit")
     public double deposit(@RequestBody DepositRequest req) {
-        return accountService.deposit(req);
+        double bal = service.deposit(req);
+        transactionService.record(
+                req.getCard(),
+                "DEPOSIT",
+                req.getAmount(),
+                "存款"
+        );
+        return bal;
     }
 
-    // 取款
     @PostMapping("/withdraw")
     public double withdraw(@RequestBody WithdrawRequest req) {
-        return accountService.withdraw(req);
+        double bal = service.withdraw(req);
+        transactionService.record(
+                req.getCard(),
+                "WITHDRAW",
+                req.getAmount(),
+                "取款"
+        );
+        return bal;
     }
 
-    // 转账
     @PostMapping("/transfer")
-    public void transfer(@RequestBody TransferRequest req) {
-        accountService.transfer(req);
+    public String transfer(@RequestBody TransferRequest req) {
+        service.transfer(req);
+        return "OK";
     }
 
-    // 修改密码
-    @PostMapping("/changePwd")
-    public boolean changePwd(@RequestBody ChangePwdRequest req) {
-        return accountService.changePassword(req.getCard(), req.getOldPwd(), req.getNewPwd());
+    @PostMapping("/password")
+    public boolean changePwd(@RequestParam String card,
+                             @RequestParam String oldPwd,
+                             @RequestParam String newPwd) {
+        return service.changePassword(card, oldPwd, newPwd);
+    }
+
+    @GetMapping("/transactions")
+    public List<Transaction> transactions(@RequestParam String card) {
+        return transactionService.getByCard(card);
     }
 }
