@@ -10,7 +10,7 @@
         </div>
         <div style="flex:1;min-width:160px">
           <div class="h2">性别</div>
-          <div style="margin-top:6px">{{ acc?.sex || '' }}</div>
+          <div style="margin-top:6px">{{ acc.sex || '' }}</div>
         </div>
         <div style="flex:1;min-width:240px">
           <div class="h2">卡号</div>

@@ -1,15 +1,18 @@
 package com.example.atm.mapper;
 
 import com.example.atm.entity.Transaction;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 @Mapper
 public interface TransactionMapper {
 
-    int insert(Transaction t);
+    @Insert("INSERT INTO transaction(card, type, amount, remark, time) VALUES(#{card}, #{type}, #{amount}, #{remark}, #{time})")
+    void insert(Transaction t);
 
-    List<Transaction> findByCard(@Param("card") String card);
+    @Select("SELECT * FROM transaction WHERE card = #{card} ORDER BY time DESC LIMIT 10")
+    List<Transaction> findByCard(String card);
 }

@@ -4,12 +4,39 @@
     <div class="card" style="max-width:560px;margin:20px auto">
       <div class="h1">自助开户</div>
       <div style="margin-top:12px;display:grid;gap:10px">
-        <input class="input" v-model="name" placeholder="姓名"/>
-        <input class="input" v-model="password" placeholder="6位数字密码" />
-        <input class="input" v-model.number="balance" type="number" min="0" placeholder="初始存款（可为0）" />
-        <select class="input" v-model="sex">
-          <option>男</option><option>女</option>
-        </select>
+        <div class="form-item">
+          <label>姓名</label>
+          <input class="input" v-model="name" placeholder="请输入姓名" />
+        </div>
+
+        <div class="form-item">
+          <label>密码（6位数字）</label>
+          <input class="input" v-model="password" type="password" placeholder="请输入密码"/>
+        </div>
+
+        <div class="form-item">
+          <label>确认密码</label>
+          <input class="input" v-model="confirmPassword" type="password" placeholder="请再次输入密码"/>
+        </div>
+
+        <div class="form-item">
+          <label>初始存款</label>
+          <input class="input" type="number" v-model="balance" placeholder="请输入金额"/>
+        </div>
+
+        <div class="form-item">
+          <label>每日限额</label>
+          <input class="input" type="number" v-model="limit" placeholder="请输入限额"/>
+        </div>
+
+        <div class="form-item">
+          <label>性别</label>
+          <select v-model="sex" class="input">
+            <option>男</option>
+            <option>女</option>
+          </select>
+        </div>
+
         <div style="display:flex;gap:8px;justify-content:flex-end">
           <button class="btn" @click="onRegister">开户</button>
           <router-link to="/login" class="btn secondary">返回登录</router-link>
@@ -19,7 +46,19 @@
     </div>
   </div>
 </template>
+<style scoped>
+.form-item {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
 
+.form-item label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+</style>
 <script>
 import NavBar from '@/components/NavBar.vue';
 import axios from 'axios';
@@ -45,7 +84,14 @@ export default {
         } else {
           this.err='开户失败，请检查信息';
         }
-      }catch(e){ this.err='服务器连接失败' }
+      }catch(e) {
+        if (e.response && e.response.data) {
+          this.err = e.response.data;   // 直接显示后端的错误文本
+        } else {
+          this.err = "服务器错误";
+        }
+      }
+
     }
   }
 }

@@ -11,6 +11,10 @@
       <div style="height:12px"></div>
       <button class="btn" @click="doTransfer">确认转账</button>
       <p v-if="msg" :style="{color: msgErr? 'var(--danger)':'var(--success)'}">{{msg}}</p>
+      <button class="btn secondary" @click="$router.push('/home')" style="margin-top:20px">
+        返回首页
+      </button>
+
     </div>
   </div>
 </template>
@@ -41,28 +45,15 @@ export default {
         });
 
         this.msg = "转账成功！";
-      } catch (e) {
-        this.err = "转账失败：" + (e.response?.data || '');
+      } catch(e) {
+        if (e.response && e.response.data) {
+          this.err = e.response.data;   // 直接显示后端的错误文本
+        } else {
+          this.err = "服务器错误";
+        }
       }
+
     }
   }
 }
 </script>
-/**
-this.msg=''; this.msgErr=false;
-if(!this.toCard || !this.amount){ this.msg='请填写完整信息'; this.msgErr=true; return; }
-if(!this.password){ this.msg='请输入密码'; this.msgErr=true; return; }
-try{
-const res = await axios.post('http://localhost:8090/api/atm/transfer', null, { params:{
-fromCard:this.user.card, toCard:this.toCard, amount:this.amount, password:this.password
-}});
-if(res.data === true || (res.data && res.data.success)) {
-this.msg='转账成功';
-this.user.balance = Number(this.user.balance) - Number(this.amount);
-localStorage.setItem('account', JSON.stringify(this.user));
-} else {
-this.msg='转账失败';
-this.msgErr=true;
-}
-}catch(e){ this.msg='服务器错误'; this.msgErr=true }
-**/

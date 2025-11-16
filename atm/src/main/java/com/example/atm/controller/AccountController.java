@@ -53,4 +53,9 @@ public class AccountController {
     ) {
         return service.changePassword(card, oldPwd, newPwd);
     }
+    @GetMapping("/info")
+    public Account info(@RequestParam String card) {
+        return service.getInfo(card);
+    }
+
 }

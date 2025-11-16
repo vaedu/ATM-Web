@@ -18,4 +18,6 @@ public interface AccountService {
     void transfer(TransferRequest request);
 
     boolean changePassword(String card, String oldPwd, String newPwd);
+    Account getInfo(String card);
+
 }

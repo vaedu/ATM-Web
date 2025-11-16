@@ -40,7 +40,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public double deposit(DepositRequest request) {
-
         Account acc = accountMapper.findByCard(request.getCard());
         if (acc == null) throw new RuntimeException("卡号不存在");
 
@@ -119,7 +118,12 @@ public class AccountServiceImpl implements AccountService {
         if (acc == null) return false;
         if (!acc.getPassword().equals(oldPwd)) return false;
 
-        accountMapper.updatePassword(card, newPwd);
+        accountMapper.updatePassword(card, oldPwd, newPwd);
         return true;
+    }
+
+    @Override
+    public Account getInfo(String card) {
+        return accountMapper.findByCard(card);
     }
 }

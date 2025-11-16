@@ -8,6 +8,10 @@
       <input class="input" v-model="password" type="password" placeholder="请输入密码"/>
       <div style="height:14px"></div>
       <button class="btn" @click="doWithdraw">确认取款</button>
+      <button class="btn secondary" @click="$router.push('/home')" style="margin-top:20px">
+        返回首页
+      </button>
+
       <p v-if="msg" :style="{color: msgErr? 'var(--danger)':'var(--success)'}">{{msg}}</p>
     </div>
   </div>
@@ -19,8 +23,8 @@ import axios from 'axios';
 export default {
   components:{NavBar},
   data(){ return { amount:null, password:'', msg:'', msgErr:false, user: JSON.parse(localStorage.getItem('account')) } },
-  methods:{
-    async doWithdraw(){
+  methods: {
+    async doWithdraw() {
       this.err = '';
       this.success = '';
 
@@ -39,8 +43,13 @@ export default {
 
         this.success = "取款成功！当前余额：" + res.data;
       } catch (e) {
-        this.err = "取款失败：" + (e.response?.data || '');
+        if (e.response && e.response.data) {
+          this.err = e.response.data;   // 直接显示后端的错误文本
+        } else {
+          this.err = "服务器错误";
+        }
       }
+
     }
   }
 }
