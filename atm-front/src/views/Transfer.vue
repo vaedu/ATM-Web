@@ -1,53 +1,88 @@
 <template>
-  <div class="container">
-    <NavBar/>
+  <div class="page">
+    <NavBar />
 
-    <div class="card">
-      <h2>转账</h2>
+    <div class="card-container">
+      <div class="card">
+        <h2>转账</h2>
 
-      <input class="input" v-model="toCard" placeholder="对方卡号"/>
-      <input class="input" v-model="amount" placeholder="金额"/>
-      <input class="input" type="password" v-model="password" placeholder="密码"/>
+        <input v-model="toCard" class="input" placeholder="对方卡号" />
+        <input v-model="amount" class="input" placeholder="金额" />
 
-      <button class="btn" @click="doTransfer">确认转账</button>
-
-      <p v-if="msg" style="margin-top:10px">{{msg}}</p>
-
-      <button class="btn secondary" @click="$router.push('/home')">返回</button>
+        <button class="btn" @click="doTransfer">确认转账</button>
+        <button class="btn secondary" @click="$router.push('/home')">返回</button>
+      </div>
     </div>
   </div>
 </template>
 
-<script>
-import NavBar from '@/components/NavBar.vue'
-import axios from 'axios'
+<script setup>
+import NavBar from "@/components/NavBar.vue";
+import axios from "axios";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-export default {
-  components:{NavBar},
-  data(){
-    return{
-      toCard:'', amount:'', password:'', msg:''
-    }
-  },
-  methods:{
-    async doTransfer(){
-      this.msg=''
-      const acc = JSON.parse(localStorage.getItem("account"))
+const toCard = ref("");
+const amount = ref("");
+const msg = ref("");
+const router = useRouter();
 
-      try{
-        const res = await axios.post("http://localhost:8090/api/atm/transfer", {
-          fromCard: account.card,
-          toCard: this.toCard,
-          amount: this.amount,
-          password: this.password
-        });
-        if(res.data){
-          this.msg="转账成功！"
-        }
-      }catch(e){
-        this.msg = e.response?.data || "服务器错误"
-      }
+async function doTransfer() {
+  msg.value = "按钮已触发"; // 确认按钮触发
+
+  const acc = JSON.parse(localStorage.getItem("account"));
+  if (!acc) {
+    msg.value = "未登录";
+    return;
+  }
+
+  if (!toCard.value || !amount.value) {
+    msg.value = "请输入对方卡号和转账金额";
+    return;
+  }
+
+  try {
+    // 请求转账
+    const res = await axios.post("http://localhost:8090/api/atm/transfer", {
+      fromCard: acc.card,
+      toCard: toCard.value,
+      amount: Number(amount.value)
+    });
+
+    // 确保后端返回了新的余额
+    if (!res.data || !res.data.data) {
+      msg.value = "转账失败";
+      return;
     }
+
+    // 更新余额
+    acc.balance = res.data.data;
+    localStorage.setItem("account", JSON.stringify(acc));
+
+    msg.value = `转账成功，当前余额：${acc.balance}元`;
+    router.push("/home");
+
+  } catch (e) {
+    msg.value = "服务器错误或余额不足";
   }
 }
+
 </script>
+
+<style scoped>
+.card-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+.card {
+  width: 400px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+</style>
+<style scoped>
+@import "@/assets/styles/Transfer.css";
+</style>

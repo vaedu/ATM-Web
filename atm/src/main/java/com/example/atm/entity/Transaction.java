@@ -14,6 +14,9 @@ public class Transaction {
     private String type;
     private double amount;
     private String remark;
-    private LocalDateTime time;
 
+    // 新增字段：用于显示对方账户名称
+    private String toName;
+
+    private LocalDateTime time;
 }

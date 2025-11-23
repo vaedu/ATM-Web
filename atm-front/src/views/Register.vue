@@ -1,62 +1,48 @@
 <template>
-  <div class="container">
-    <NavBar/>
+  <div class="register-page">
 
-    <div class="card">
-      <h2>自助开户</h2>
+    <NavBar />
 
-      <label>姓名</label>
-      <input class="input" v-model="name"/>
+    <div class="register-card">
+      <h2 class="title">开户申请</h2>
 
-      <label>密码（6位数字）</label>
-      <input class="input" v-model="password" type="password"/>
+      <div class="input-group">
+        <label>姓名</label>
+        <input v-model="name" class="input" placeholder="请输入姓名" />
+      </div>
 
-      <label>性别</label>
-      <select class="input" v-model="sex">
-        <option value="男">男</option>
-        <option value="女">女</option>
-      </select>
+      <div class="input-group">
+        <label>卡号</label>
+        <input v-model="card" class="input" placeholder="请输入卡号（8~20位）" />
+      </div>
 
-      <label>每日限额</label>
-      <input class="input" v-model="limit"/>
+      <div class="input-group">
+        <label>密码</label>
+        <input type="password" v-model="password" class="input" placeholder="请输入密码" />
+      </div>
 
-      <button class="btn" @click="doReg">确认开户</button>
+      <div class="input-group">
+        <label>确认密码</label>
+        <input type="password" v-model="confirm" class="input" placeholder="再次输入密码" />
+      </div>
 
-      <p v-if="msg">{{msg}}</p>
+      <div class="input-group">
+        <label>性别</label>
+        <select v-model="sex" class="input">
+          <option value="">请选择</option>
+          <option value="男">男</option>
+          <option value="女">女</option>
+        </select>
+      </div>
 
-      <button class="btn secondary" @click="$router.push('/')">返回登录</button>
+      <button class="btn primary" @click="submitRegister">提交开户申请</button>
+
+      <p v-if="msg" class="msg">{{ msg }}</p>
+
+      <button class="btn secondary" @click="$router.push('/login')">返回登录</button>
     </div>
   </div>
 </template>
 
-<script>
-import NavBar from '@/components/NavBar.vue'
-import axios from 'axios'
-
-export default {
-  components:{NavBar},
-  data(){
-    return{
-      name:'', password:'', sex:'男', limit:'', msg:''
-    }
-  },
-  methods:{
-    async doReg(){
-      this.msg=''
-      try{
-        const res = await axios.post("http://localhost:8090/api/atm/register", {
-          name:this.name,
-          password:this.password,
-          sex:this.sex,
-          limit:Number(this.limit)
-        })
-        if(res.data){
-          this.msg="开户成功！您的卡号为：" + res.data.card
-        }
-      }catch(e){
-        this.msg="服务器错误"
-      }
-    }
-  }
-}
-</script>
+<script src="@/assets/scripts/register.js"></script>
+<style src="@/assets/styles/register.css"></style>

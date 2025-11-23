@@ -1,62 +1,69 @@
 <template>
-  <div class="container">
-    <NavBar/>
-    <div class="card" style="max-width:500px;margin:20px auto">
-      <div class="h1">用户登录</div>
+  <div class="login-container">
+    <div class="login-card">
 
-      <div style="margin-top:10px">
-        <input class="input" v-model="card" placeholder="请输入卡号"/>
-        <div style="height:12px"></div>
-        <input class="input" v-model="password" placeholder="请输入6位数字密码" type="password"/>
-        <div style="height:12px"></div>
-        <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
-          <button class="btn" @click="onLogin">登录</button>
-          <router-link to="/register" class="btn secondary">去开户</router-link>
-        </div>
-        <p v-if="err" style="color:var(--danger);margin-top:10px">{{err}}</p>
+      <h2 class="login-title">账户登录</h2>
+
+      <div class="form-group">
+        <label>卡号</label>
+        <input id="card" type="text" v-model="card" class="input" placeholder="请输入卡号">
       </div>
+
+      <div class="form-group">
+        <label>密码</label>
+        <input id="password" type="password" v-model="password" class="input" placeholder="请输入密码">
+      </div>
+
+      <button class="btn" @click="doLogin">登录</button>
+
+      <p class="msg">{{ msg }}</p>
+
+      <button class="btn-text" @click="$router.push('/register')">
+        没有账户？去开户 →
+      </button>
+
     </div>
   </div>
 </template>
 
-<script>
-import NavBar from '@/components/NavBar.vue';
-import axios from 'axios';
-export default {
-  components:{NavBar},
-  data(){ return { card:'', password:'', err:'' } },
+<script setup>
+import { ref } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import { encryptPassword } from "@/assets/scripts/encryption";  // 引入加密方法
 
-  methods:{
-    async onLogin() {
-      this.err = '';
+const card = ref("");
+const password = ref("");
+const msg = ref("");
+const router = useRouter();
 
-      if (!this.card || !this.password) {
-        this.err = '请填写卡号和密码';
-        return;
-      }
+async function doLogin() {
+  msg.value = "";
 
-      try {
-        const res = await axios.post("http://localhost:8090/api/atm/login", {
-          card: this.card,
-          password: this.password
-        });
+  try {
+    // 对密码进行加密
+    const encryptedPassword = encryptPassword(password.value);
 
-        if (res.data && res.data.card) {
-          localStorage.setItem('account', JSON.stringify(res.data));
-          this.$router.push('/home');
-        } else {
-          this.err = '登录失败：卡号或密码错误';
-        }
-      } catch (e) {
-        console.log(e);
-        this.err = '服务器连接失败或账号密码错误';
-      }
+    const res = await axios.post("http://localhost:8090/api/atm/login", {
+      card: card.value,
+      password: encryptedPassword  // 发送加密后的密码
+    });
+
+    if (!res.data.success) {
+      msg.value = res.data.message || "登录失败";
+      return;
     }
 
+    // 只保存真正的账户对象
+    localStorage.setItem("account", JSON.stringify(res.data.data));
+    router.push("/home");
+
+  } catch (e) {
+    msg.value = "服务器错误";
   }
 }
 </script>
 
 <style scoped>
-.card{padding:22px}
+@import "@/assets/styles/login.css";
 </style>

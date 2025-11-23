@@ -26,10 +26,42 @@ public class TransactionServiceImpl implements TransactionService {
         t.setRemark(remark);
         t.setTime(LocalDateTime.now());
         mapper.insert(t);
+        trimOld(card);
+    }
+
+    @Override
+    public void recordTransfer(String fromCard, String toCard, double amount, String fromName, String toName) {
+
+        // 转出记录：显示“转账给：对方姓名”
+        Transaction out = new Transaction();
+        out.setCard(fromCard);
+        out.setType("TRANSFER_OUT");
+        out.setAmount(amount);
+        out.setRemark("转账给：" + toName);
+        out.setToName(toName);
+        out.setTime(LocalDateTime.now());
+        mapper.insert(out);
+        trimOld(fromCard);
+
+        // 转入记录：显示“来自：对方姓名”
+        Transaction in = new Transaction();
+        in.setCard(toCard);
+        in.setType("TRANSFER_IN");
+        in.setAmount(amount);
+        in.setRemark("来自：" + fromName);
+        in.setToName(fromName);
+        in.setTime(LocalDateTime.now());
+        mapper.insert(in);
+        trimOld(toCard);
     }
 
     @Override
     public List<Transaction> getByCard(String card) {
         return mapper.findByCard(card);
+    }
+
+    @Override
+    public void trimOld(String card) {
+        mapper.trimOldRecords(card);
     }
 }

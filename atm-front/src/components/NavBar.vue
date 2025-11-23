@@ -27,16 +27,26 @@ export default {
 </script>
 
 <style scoped>
-.nav{
+.nav {
   height: 60px;
   background: var(--theme);
-  color:white;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 0 16px;
-  font-size:18px;
+  font-size: 18px;
+  position: fixed; /* 固定导航栏 */
+  top: 0; /* 顶部 */
+  width: 100%; /* 宽度为 100% */
+  z-index: 10; /* 确保在页面上层 */
 }
+
+body {
+  padding-top: 60px; /* 防止内容被导航栏遮挡 */
+}
+
+
 .left{
   cursor:pointer;
   font-weight: bold;

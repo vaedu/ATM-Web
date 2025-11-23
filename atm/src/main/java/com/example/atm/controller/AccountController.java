@@ -7,22 +7,15 @@ import com.example.atm.entity.Account;
 import com.example.atm.entity.Transaction;
 import com.example.atm.service.AccountService;
 import com.example.atm.service.TransactionService;
+import lombok.Data;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/atm")
 public class AccountController {
-    @ExceptionHandler(RuntimeException.class)
-    public Map<String, Object> handleRuntime(RuntimeException ex) {
-        Map<String, Object> r = new HashMap<>();
-        r.put("success", false);
-        r.put("message", ex.getMessage());
-        return r;
-    }
 
     private final AccountService service;
     private final TransactionService transactionService;
@@ -32,56 +25,110 @@ public class AccountController {
         this.transactionService = transactionService;
     }
 
+    /* --- 统一返回结构 --- */
+    @Data
+    public static class Result<T> {
+        private boolean success;
+        private String message;
+        private T data;
+
+        public static <T> Result<T> ok(T data) {
+            Result<T> r = new Result<>();
+            r.success = true;
+            r.data = data;
+            return r;
+        }
+
+        public static <T> Result<T> fail(String msg) {
+            Result<T> r = new Result<>();
+            r.success = false;
+            r.message = msg;
+            return r;
+        }
+    }
+
+    /* --- 全局业务异常 --- */
+    @ExceptionHandler(RuntimeException.class)
+    public Result<?> handleRuntime(RuntimeException ex) {
+        return Result.fail(ex.getMessage());
+    }
+
+    /* --- 登录 --- */
     @PostMapping("/login")
-    public Account login(@RequestBody Account req) {
-        return service.login(req.getCard(), req.getPassword());
+    public Result<Account> login(@RequestBody Account req) {
+        Account acc = service.login(req.getCard(), req.getPassword());
+        if (acc == null) {
+            return Result.fail("卡号或密码错误");
+        }
+        return Result.ok(acc);
     }
 
-
+    /* --- 获取账户信息 --- */
     @GetMapping("/info")
-    public Account info(@RequestParam String card) {
-        return service.getInfo(card);
+    public Result<Account> info(@RequestParam String card) {
+        Account acc = service.getInfo(card);
+        if (acc == null) {
+            return Result.fail("账号不存在");
+        }
+        return Result.ok(acc);
     }
 
+    /* --- 存款 --- */
     @PostMapping("/deposit")
-    public double deposit(@RequestBody DepositRequest req) {
+    public Result<Double> deposit(@RequestBody DepositRequest req) {
         double bal = service.deposit(req);
-        transactionService.record(
-                req.getCard(),
-                "DEPOSIT",
-                req.getAmount(),
-                "存款"
-        );
-        return bal;
+        transactionService.record(req.getCard(), "DEPOSIT", req.getAmount(), "存款");
+        return Result.ok(bal);
     }
 
+    /* --- 取款 --- */
     @PostMapping("/withdraw")
-    public double withdraw(@RequestBody WithdrawRequest req) {
+    public Result<Double> withdraw(@RequestBody WithdrawRequest req) {
         double bal = service.withdraw(req);
-        transactionService.record(
-                req.getCard(),
-                "WITHDRAW",
-                req.getAmount(),
-                "取款"
-        );
-        return bal;
+        transactionService.record(req.getCard(), "WITHDRAW", req.getAmount(), "取款");
+        return Result.ok(bal);
     }
 
+    /* --- 转账 --- */
     @PostMapping("/transfer")
-    public String transfer(@RequestBody TransferRequest req) {
+    public Result<String> transfer(@RequestBody TransferRequest req) {
+
         service.transfer(req);
-        return "OK";
+
+        Account from = service.getInfo(req.getFromCard());
+        Account to = service.getInfo(req.getToCard());
+
+        if (from == null || to == null) {
+            return Result.fail("转账账户不存在");
+        }
+
+        transactionService.recordTransfer(
+                req.getFromCard(),
+                req.getToCard(),
+                req.getAmount(),
+                from.getName(),
+                to.getName()
+        );
+
+        return Result.ok("OK");
     }
 
-    @PostMapping("/password")
-    public boolean changePwd(@RequestParam String card,
-                             @RequestParam String oldPwd,
-                             @RequestParam String newPwd) {
-        return service.changePassword(card, oldPwd, newPwd);
+    /* --- 修改密码 --- */
+    @PostMapping("/change")
+    public Result<String> changePassword(@RequestBody java.util.Map<String, String> req) {
+        String card = req.get("card");
+        String oldPwd = req.get("oldPwd");
+        String newPwd = req.get("newPwd");
+
+        boolean ok = service.changePassword(card, oldPwd, newPwd);
+        if (!ok) return Result.fail("修改失败");
+
+        return Result.ok("修改成功");
     }
 
+    /* --- 查询最近 10 条交易记录 --- */
     @GetMapping("/transactions")
-    public List<Transaction> transactions(@RequestParam String card) {
-        return transactionService.getByCard(card);
+    public Result<List<Transaction>> transactions(@RequestParam String card) {
+        return Result.ok(transactionService.getByCard(card));
     }
 }

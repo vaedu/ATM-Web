@@ -1,46 +1,53 @@
 <template>
-  <div class="container">
-    <NavBar/>
+  <div class="page">
+    <NavBar />
 
-    <div class="card">
-      <h2>存款</h2>
+    <div class="card-container">
+      <div class="card">
+        <h2>存款</h2>
 
-      <input class="input" v-model="amount" placeholder="请输入金额"/>
-      <button class="btn" @click="doDeposit">确认存款</button>
+        <input v-model="amount" class="input" placeholder="请输入金额" />
 
-      <p v-if="msg" style="margin-top:10px">{{msg}}</p>
-
-      <button class="btn secondary" @click="$router.push('/home')">返回</button>
+        <button class="btn" @click="doDeposit">确认存款</button>
+        <button class="btn secondary" @click="$router.push('/home')">返回</button>
+      </div>
     </div>
   </div>
 </template>
 
-<script>
-import NavBar from '@/components/NavBar.vue'
-import axios from 'axios'
+<script setup>
+import NavBar from "@/components/NavBar.vue";
+import axios from "axios";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-export default {
-  components:{ NavBar },
-  data(){
-    return{ amount:'', msg:'' }
-  },
-  methods:{
-    async doDeposit(){
-      this.msg=''
-      const acc = JSON.parse(localStorage.getItem("account"))
+const amount = ref("");
+const router = useRouter();
 
-      try{
-        const res = await axios.post("http://localhost:8090/api/atm/deposit", {
-          card: account.card,
-          amount: this.amount
-        });
-        if(res.data){
-          this.msg="存款成功！"
-        }
-      }catch(e){
-        this.msg="服务器错误"
-      }
-    }
-  }
+async function doDeposit() {
+  const acc = JSON.parse(localStorage.getItem("account"));
+  if (!acc) return;
+
+  await axios.post("http://localhost:8090/api/atm/deposit", {
+    card: acc.card,
+    amount: Number(amount.value)
+  });
+
+  router.push("/home");
 }
 </script>
+
+<style scoped>
+.card-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+.card {
+  width: 400px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+</style>

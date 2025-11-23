@@ -1,62 +1,59 @@
 <template>
-  <div class="container">
-    <NavBar/>
+  <div class="page">
+    <NavBar />
 
-    <div class="card">
-      <h2>修改密码</h2>
+    <div class="card-container">
+      <div class="card">
+        <h2>修改密码</h2>
 
-      <input class="input" v-model="oldPwd" placeholder="旧密码" type="password"/>
-      <input class="input" v-model="newPwd" placeholder="新密码" type="password"/>
+        <input v-model="oldPwd" class="input" placeholder="旧密码" />
+        <input v-model="newPwd" class="input" placeholder="新密码" />
 
-      <button class="btn" @click="doChange">确认修改</button>
-
-      <p v-if="msg" style="margin-top:10px">{{msg}}</p>
-
-      <button class="btn secondary" @click="$router.push('/home')">返回</button>
+        <button class="btn" @click="changePwd">确认修改</button>
+        <button class="btn secondary" @click="$router.push('/home')">返回</button>
+      </div>
     </div>
   </div>
 </template>
 
-<script>
-import axios from "axios";
+<script setup>
 import NavBar from "@/components/NavBar.vue";
+import axios from "axios";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-export default {
-  components: {NavBar},
-  data() {
-    return {
-      oldPwd: "",
-      newPwd: "",
-      msg: ""
-    };
-  },
-  methods: {
-    async doChange() {
+const oldPwd = ref("");
+const newPwd = ref("");
+const router = useRouter();
 
-      const acc = JSON.parse(localStorage.getItem("account")); // ← 正确的变量
+async function changePwd() {
+  const acc = JSON.parse(localStorage.getItem("account"));
+  if (!acc) return;
 
-      if (!acc) {
-        this.msg = "请重新登录";
-        return;
-      }
+  await axios.post("http://localhost:8090/api/atm/change", {
+    card: acc.card,
+    oldPwd: oldPwd.value,
+    newPwd: newPwd.value
+  });
 
-      try {
-        const resp = await axios.post("http://localhost:8090/api/atm/change", {
-          card: acc.card,
-          oldPwd: this.oldPwd,
-          newPwd: this.newPwd
-        });
-
-        if (resp.data.success) {
-          this.msg = "密码修改成功";
-        } else {
-          this.msg = resp.data.message;
-        }
-      } catch (e) {
-        this.msg = "服务器错误";
-      }
-    }
-  }
-};
+  router.push("/home");
+}
 </script>
 
+<style scoped>
+.card-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+.card {
+  width: 400px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+</style>
+<style scoped>
+@import "@/assets/styles/ChangePassword.css";
+</style>

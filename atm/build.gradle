@@ -27,7 +27,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
-
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.68'
 }
 
 tasks.named('test') {

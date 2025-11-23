@@ -7,5 +7,9 @@ public interface TransactionService {
 
     void record(String card, String type, double amount, String remark);
 
+    // 新增：专用于转账（需要对方名字）
+    void recordTransfer(String fromCard, String toCard, double amount, String fromName, String toName);
+
+    void trimOld(String card);
     List<Transaction> getByCard(String card);
 }

@@ -1,86 +1,47 @@
 <template>
-  <div class="container">
-    <NavBar/>
+  <div class="home-container">
+    <NavBar />
 
-    <div class="grid">
+    <div class="home-content">
 
-      <div class="panel">
-        <h2>账户信息</h2>
-        <p>姓名：{{ info.name }}</p>
-        <p>卡号：{{ info.card }}</p>
-        <p>余额：{{ info.balance }} 元</p>
-        <p>每日限额：{{ info.limit }} 元</p>
-        <p>性别：{{ info.sex }}</p>
+      <!-- 左侧账户信息卡片 -->
+      <div class="info-card">
+        <h2 class="title">账户信息</h2>
+
+        <p><strong>户主：</strong><span id="name"></span></p>
+        <p><strong>卡号：</strong><span id="card"></span></p>
+        <p><strong>余额：</strong><span id="balance"></span> 元</p>
+        <p><strong>性别：</strong><span id="gender"></span></p>
+        <p><strong>每日限额：</strong><span id="limit"></span> 元</p>
+
+        <div class="btn-group">
+          <button class="btn" @click="$router.push('/deposit')">存款</button>
+          <button class="btn" @click="$router.push('/withdraw')">取款</button>
+          <button class="btn" @click="$router.push('/transfer')">转账</button>
+          <button class="btn" @click="$router.push('/change-password')">修改密码</button>
+        </div>
       </div>
 
-      <div class="panel">
-        <h2>快速操作</h2>
-        <button @click="$router.push('/deposit')" class="btn">存款</button>
-        <button @click="$router.push('/withdraw')" class="btn">取款</button>
-        <button @click="$router.push('/transfer')" class="btn">转账</button>
-        <button @click="$router.push('/change-password')" class="btn">修改密码</button>
-      </div>
-
-      <div class="panel">
-        <h2>最近交易记录</h2>
-        <TransactionList :list="records"/>
+      <!-- 右侧交易记录 -->
+      <div class="record-card">
+        <h2 class="title">最近交易记录（仅保留 10 条）</h2>
+        <div id="recordList" class="record-list"></div>
       </div>
 
     </div>
-
   </div>
 </template>
 
 <script>
-import NavBar from '@/components/NavBar.vue'
-import TransactionList from '@/components/TransactionList.vue'
-import axios from 'axios'
+import "@/assets/styles/home.css";
+import initHome from "@/assets/scripts/home.js";
+import NavBar from "@/components/NavBar.vue";
 
 export default {
-  components:{NavBar, TransactionList},
-  data(){
-    return{
-      info:{},
-      records:[]
-    }
+  components: { NavBar },
+
+  mounted() {
+    initHome();   // 🟦 调用 home.js 中的初始化函数
   },
-  async created(){
-    const acc = JSON.parse(localStorage.getItem("account"))
-    if(!acc){
-      this.$router.push("/")
-      return
-    }
-
-    // 获取账户信息
-    const r1 = await axios.get("http://localhost:8090/api/atm/info", {
-      params:{ card: acc.card }
-    })
-    this.info = r1.data
-
-    // 最近交易
-    const r2 = await axios.get("http://localhost:8090/api/atm/transactions", {
-      params:{ card: acc.card }
-    })
-    this.records = r2.data
-  }
-}
+};
 </script>
-
-<style scoped>
-.grid{
-  display:grid;
-  gap:20px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  margin-top:20px;
-}
-.panel{
-  background:white;
-  border-radius:12px;
-  padding:20px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
-}
-.btn{
-  margin:6px 0;
-  width:100%;
-}
-</style>

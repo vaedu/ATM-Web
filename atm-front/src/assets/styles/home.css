@@ -1,172 +1,138 @@
-/* ===============================
-   通用布局
-   =============================== */
+/* home.css - 增强优先级修复 */
 .home-container {
-    width: 100%;
-    min-height: 100vh;
-    background: #f5f7fa;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: "Inter", "Microsoft YaHei", sans-serif;
+    margin-top: 60px !important;  /* 防止导航栏遮挡 */
+    padding-top: 20px !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    background: #f5f8fc !important;
+    font-family: "Microsoft YaHei", sans-serif !important;
 }
 
-/* ===============================
-   顶部栏
-   =============================== */
-.home-header {
-    width: 100%;
-    background: linear-gradient(90deg, #005bea, #00c6fb);
-    padding: 28px 36px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-    box-sizing: border-box;
-}
-
-.home-header .title {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-
-.home-header .logout-btn {
-    background: white;
-    color: #005bea;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    transition: 0.25s;
-}
-
-.home-header .logout-btn:hover {
-    background: #e8f0ff;
-}
-
-/* ===============================
-   功能区卡片
-   =============================== */
 .home-content {
-    margin-top: 30px;
-    width: 92%;
-    max-width: 900px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 22px;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 35px !important;
+    padding: 20px 40px !important;
+    flex-wrap: nowrap !important;  /* 防止小屏自动换行，除非媒体查询 */
 }
 
-.action-card {
-    background: white;
-    padding: 26px;
-    border-radius: 14px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    transition: 0.25s;
-    cursor: pointer;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
+/* 左侧账户信息卡片 - 强制固定宽度 */
+.info-card {
+    width: 380px !important;
+    flex-shrink: 0 !important;  /* 防止压缩 */
+    background: #fff !important;
+    border-radius: 14px !important;
+    padding: 25px 30px !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+    margin: 0 !important;  /* 覆盖任何auto margin */
 }
 
-.action-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-    background: #f0f7ff;
+.title {
+    font-size: 22px !important;
+    color: #0a4fa3 !important;
+    margin-bottom: 20px !important;
 }
 
-/* ===============================
-   交易记录
-   =============================== */
-.record-section {
-    width: 92%;
-    max-width: 900px;
-    margin-top: 38px;
+.info-card p {
+    font-size: 15px !important;
+    margin: 9px 0 !important;
+    color: #333 !important;
 }
 
-.record-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 14px;
-    color: #333;
+.btn-group {
+    margin-top: 20px !important;
 }
 
+.btn {
+    width: 100% !important;
+    padding: 12px !important;
+    background: #0a6ad9 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    margin-bottom: 12px !important;
+    cursor: pointer !important;
+    font-size: 15px !important;
+    transition: .2s !important;
+}
+
+.btn:hover {
+    background: #0a57b7 !important;
+}
+
+/* 右侧交易记录 - flex扩展 */
 .record-card {
-    background: white;
-    padding: 18px 20px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    flex: 1 !important;
+    min-width: 300px !important;  /* 最小宽度防挤压 */
+    background: #fff !important;
+    border-radius: 14px !important;
+    padding: 25px 30px !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+    max-width: 700px !important;
+    margin: 0 !important;
 }
 
-.record-top {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 17px;
-    font-weight: 600;
+.record-list {
+    margin-top: 15px !important;
 }
 
-.record-bottom {
-    font-size: 14px;
-    color: #666;
+.record-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 12px 0 !important;
+    border-bottom: 1px solid #e4e7ed !important;
 }
 
-/* 金额颜色 */
-.amount-plus {
-    color: #0ea200;
+.record-item:last-child {
+    border-bottom: none !important;
 }
 
-.amount-minus {
-    color: #d60000;
+.left span {
+    display: block !important;
 }
 
-/* ===============================
-   响应式布局
-   =============================== */
+.type {
+    font-weight: bold !important;
+    color: #0a4fa3 !important;
+}
 
-/* 平板 */
+.remark {
+    font-size: 14px !important;
+    color: #555 !important;
+    margin-top: 3px !important;
+}
+
+.right {
+    text-align: right !important;
+}
+
+.amount {
+    font-size: 16px !important;
+    font-weight: bold !important;
+    color: #0a6ad9 !important;
+}
+
+.time {
+    display: block !important;
+    margin-top: 2px !important;
+    font-size: 13px !important;
+    color: #777 !important;
+}
+
+/* 响应式：小屏垂直堆叠 */
 @media (max-width: 900px) {
     .home-content {
-        grid-template-columns: 1fr 1fr;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 20px !important;
+        padding: 20px 15px !important;  /* 减小padding防挤 */
     }
-}
-
-/* 手机 */
-@media (max-width: 600px) {
-    .home-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 12px;
+    .info-card {
+        width: 100% !important;
+        max-width: 400px !important;
     }
-
-    .home-header .title {
-        font-size: 24px;
-    }
-
-    .home-content {
-        grid-template-columns: 1fr; /* 改为单列 */
-    }
-
-    .action-card {
-        padding: 22px;
-        font-size: 17px;
-    }
-
     .record-card {
-        padding: 14px 16px;
-    }
-}
-
-/* 超小屏幕 */
-@media (max-width: 380px) {
-    .home-header .title {
-        font-size: 20px;
-    }
-
-    .action-card {
-        font-size: 16px;
+        width: 100% !important;
+        max-width: none !important;
     }
 }

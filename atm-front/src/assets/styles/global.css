@@ -13,15 +13,42 @@
     --font: "Inter", "Microsoft YaHei", sans-serif;
     --theme: #4a90e2; /* 主色（蓝色主题） */
 }
+/* 让所有页面都从导航条下方开始 */
+.page {
+    padding-top: 80px; /* 与 NavBar 高度一致 */
+    width: 100%;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
 
 /* reset */
 *{box-sizing:border-box;margin:0;padding:0}
-html,body,#app{height:100%}
+html,body,#app{
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* 防止横向滚动条 */
+}
 body{
     font-family: var(--font), serif;
     background:var(--bg);
     color:#111827;
     -webkit-font-smoothing:antialiased;
+}
+.info-card, .record-card {
+    width: 100%;  /* 宽度占满父容器 */
+    max-width: 600px; /* 如果需要限制最大宽度 */
+    margin: 0 auto;  /* 居中对齐 */
+}
+
+/* global.css */
+/*body {*/
+/*    padding-top: 60px;  !* 确保页面不会被导航栏遮挡 *!*/
+/*}*/
+
+.container {
+    margin-top: 60px; /* 防止与导航栏重叠 */
 }
 
 /* 通用容器 */
