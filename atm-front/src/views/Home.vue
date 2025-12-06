@@ -33,9 +33,9 @@
 </template>
 
 <script>
-import "@/assets/styles/home.css";
-import initHome from "@/assets/scripts/home.js";
+import "@/assets/styles/home.css"
 import NavBar from "@/components/NavBar.vue";
+import initHome from '@/assets/scripts/home.js';
 
 export default {
   components: { NavBar },

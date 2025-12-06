@@ -52,6 +52,12 @@ public class AccountController {
     public Result<?> handleRuntime(RuntimeException ex) {
         return Result.fail(ex.getMessage());
     }
+    // 开户
+    @PostMapping("/register")
+    public Result<Account> register(@RequestBody Account req) {
+        Account acc = service.register(req);
+        return Result.ok(acc);
+    }
 
     /* --- 登录 --- */
     @PostMapping("/login")

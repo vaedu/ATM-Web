@@ -44,7 +44,7 @@ async function doLogin() {
     // 对密码进行加密
     const encryptedPassword = encryptPassword(password.value);
 
-    const res = await axios.post("http://localhost:8090/api/atm/login", {
+    const res = await axios.post(`${process.env.VUE_APP_API_URL}login`, {
       card: card.value,
       password: encryptedPassword  // 发送加密后的密码
     });

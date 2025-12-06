@@ -43,7 +43,7 @@ async function doTransfer() {
 
   try {
     // 请求转账
-    const res = await axios.post("http://localhost:8090/api/atm/transfer", {
+    const res = await axios.post(`${process.env.VUE_APP_API_URL}transfer`, {
       fromCard: acc.card,
       toCard: toCard.value,
       amount: Number(amount.value)

@@ -14,9 +14,10 @@ export default async function initHome() {
     await loadRecords(card);
 }
 
+// 获取账号信息
 async function loadAccountInfo(card) {
     try {
-        const res = await axios.get("http://localhost:8090/api/atm/info?card=" + card);
+        const res = await axios.get(`${process.env.VUE_APP_API_URL}/info?card=` + card);
         const data = res.data.data;
 
         document.getElementById("name").textContent = data.name;
@@ -30,10 +31,11 @@ async function loadAccountInfo(card) {
     }
 }
 
+// 获取交易记录
 async function loadRecords(card) {
     try {
-        const res = await axios.get("http://localhost:8090/api/atm/transactions?card=" + card);
-        const records = res.data.data; // 假设返回是 { success: true, data: [...] }
+        const res = await axios.get(`${process.env.VUE_APP_API_URL}/transactions?card=` + card);
+        const records = res.data.data;
 
         const list = document.getElementById("recordList");
         list.innerHTML = "";
@@ -48,15 +50,15 @@ async function loadRecords(card) {
             div.className = "record-item";
 
             div.innerHTML = `
-        <div class="left">
-            <span class="type">${mapType(t.type)}</span>
-            <span class="remark">${t.remark}</span>
-        </div>
-        <div class="right">
-            <span class="amount">${formatAmount(t.type, t.amount)}</span>
-            <span class="time">${t.time.replace("T", " ")}</span>
-        </div>
-      `;
+            <div class="left">
+                <span class="type">${mapType(t.type)}</span>
+                <span class="remark">${t.remark}</span>
+            </div>
+            <div class="right">
+                <span class="amount">${formatAmount(t.type, t.amount)}</span>
+                <span class="time">${t.time.replace("T", " ")}</span>
+            </div>
+            `;
 
             list.appendChild(div);
         });
@@ -65,7 +67,6 @@ async function loadRecords(card) {
         document.getElementById("recordList").innerHTML = "<p>记录加载失败</p>";
     }
 }
-
 
 function mapType(type) {
     switch (type) {

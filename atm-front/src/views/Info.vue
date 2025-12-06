@@ -29,7 +29,7 @@ export default {
   },
   async created(){
     const acc = JSON.parse(localStorage.getItem("account"));
-    const r = await axios.get("http://localhost:8090/api/atm/info", {
+    const r = await axios.get(`${process.env.VUE_APP_API_URL}/info`, {
       params:{ card: acc.card }
     });
     this.info = r.data;

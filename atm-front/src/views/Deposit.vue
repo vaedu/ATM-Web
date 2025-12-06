@@ -28,7 +28,7 @@ async function doDeposit() {
   const acc = JSON.parse(localStorage.getItem("account"));
   if (!acc) return;
 
-  await axios.post("http://localhost:8090/api/atm/deposit", {
+  await axios.post(`${process.env.VUE_APP_API_URL}/deposit`, {
     card: acc.card,
     amount: Number(amount.value)
   });
