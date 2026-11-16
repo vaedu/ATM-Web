@@ -14,6 +14,7 @@ import com.example.atm.entity.Account;
 import com.example.atm.mapper.AccountMapper;
 import com.example.atm.mapper.TransactionMapper;
 import com.example.atm.service.AccountService;
+import com.example.atm.Utils.SessionManager;
 import com.example.atm.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,8 @@ public class AccountServiceImpl implements AccountService {
 	private final TransactionMapper transactionMapper;
 	private final TransactionService transactionService;
 	private final StringRedisTemplate stringRedisTemplate;
+	private final SessionManager sessionManager;
+
 	@Value("${atm.aes-key}")
 	private String aesKey;
 	//  BCrypt 实例
@@ -137,7 +140,9 @@ public class AccountServiceImpl implements AccountService {
 		} else {
 			token = jwtUtils.getAccountToken(claims);
 		}
-		stringRedisTemplate.opsForValue().set(LOGIN_KEY + card, jti,Duration.ofMinutes(15));
+		if (!"TEST".equals(account.getStatus())) {
+			sessionManager.create(account.getCard(), jti);
+		}
 		stringRedisTemplate.delete(FAIL_KEY + card);
 		//  返回 DTO，不含密码等敏感字段
 		LoginResponse rep = BeanUtil.copyProperties(account, LoginResponse.class);

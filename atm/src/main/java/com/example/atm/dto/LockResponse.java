@@ -9,4 +9,5 @@ public class LockResponse {
 	private String card;
 	private String name;
 	private String status;
+	private String closeTime;
 }

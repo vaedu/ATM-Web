@@ -1,5 +1,6 @@
 package com.example.atm.service.impl;
 
+import com.example.atm.Utils.SessionManager;
 import com.example.atm.common.exception.*;
 import com.example.atm.dto.LockResponse;
 import com.example.atm.entity.Account;
@@ -20,11 +21,11 @@ import java.util.List;
 public class AdminServiceImpl implements AdminService {
 	private final AdminMapper adminMapper;
 	private final AccountMapper accountMapper;
-
+	private final SessionManager sessionManager;
 	@Override
-	public List<LockResponse> findAllLockedAccounts() {
-		log.info("查询所有的锁定账号");
-		return adminMapper.findAllLockedAccounts();
+	public List<LockResponse> findAllAccounts() {
+		log.info("查询所有账号");
+		return adminMapper.findAllAccounts();
 	}
 
 	@Override
@@ -70,5 +71,18 @@ public class AdminServiceImpl implements AdminService {
 			throw new AccountNotFoundException("账号不存在");
 		}
 		return account;
+	}
+
+	@Override
+	public void lock(String card) {
+		String status = accountMapper.findByCard(card).getStatus();
+		if (status.equals("LOCKED")) {
+			throw new AccountLockedException("该账号已锁定");
+		}
+		if (status.equals("TEST")) {
+			throw new AccountLockedException("该账号为测试账号，不能锁定");
+		}
+		accountMapper.lockAccount(card);
+		sessionManager.revoke(card);
 	}
 }

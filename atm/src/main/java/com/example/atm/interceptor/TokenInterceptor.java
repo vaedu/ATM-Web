@@ -3,26 +3,27 @@ package com.example.atm.interceptor;
 
 import com.example.atm.Utils.CurrentUser;
 import com.example.atm.Utils.JwtUtils;
+import com.example.atm.Utils.SessionManager;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 
 import java.io.IOException;
 
-import static com.example.atm.Utils.RedisConstants.LOGIN_KEY;
+import static com.example.atm.Utils.RedisConstants.HEARTBEAT_PATH;
 
 @Component
 @RequiredArgsConstructor
 public class TokenInterceptor implements HandlerInterceptor {
 	private final JwtUtils jwtUtils;
-	private final StringRedisTemplate stringRedisTemplate;
+	private final SessionManager sessionManager;
+
 	/**
 	 * 在请求处理之前进行拦截，验证请求的令牌。
 	 *
@@ -44,13 +45,14 @@ public class TokenInterceptor implements HandlerInterceptor {
 			// 解析token获取用户信息
 			Claims claims = jwtUtils.parseUserOrAdminToken(token);
 			String card = claims.get("card", String.class);
-			String status = claims.get("status",String.class);
+			String status = claims.get("status", String.class);
 			request.setAttribute(CurrentUser.ATTR, card);
 			// 非测试用户需验证Redis中的会话一致性
-			if (!"TEST".equals(status)){
+			if (!"TEST".equals(status)) {
 				String jti = claims.get("jti", String.class);
-				String jti_R = stringRedisTemplate.opsForValue().get(LOGIN_KEY + card);
-				if (jti_R == null || !jti_R.equals(jti)) {
+				// 心跳请求只校验会话，不续期；其它请求校验通过后重置空闲超时
+				boolean renew = !HEARTBEAT_PATH.equals(request.getRequestURI());
+				if (!sessionManager.validate(card, jti, renew)) {
 					return reject(response, "登录已失效，请重新登录");
 				}
 			}

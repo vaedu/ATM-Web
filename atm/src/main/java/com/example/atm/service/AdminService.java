@@ -7,11 +7,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface AdminService {
-	List<LockResponse> findAllLockedAccounts();
+	List<LockResponse> findAllAccounts();
 
 	void unlock(String card);
 
 	void limit(String card, BigDecimal max, BigDecimal min);
 
 	Account findLimitByCard(String card);
+	void lock(String card);
 }

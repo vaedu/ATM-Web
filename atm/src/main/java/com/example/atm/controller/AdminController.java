@@ -6,7 +6,6 @@ import com.example.atm.dto.InfoResponse;
 import com.example.atm.entity.Account;
 import com.example.atm.service.AdminService;
 import lombok.AllArgsConstructor;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -17,9 +16,9 @@ import java.math.BigDecimal;
 public class AdminController {
 	private AdminService adminService;
 
-	@GetMapping("/lock")
-	public Result findAllLockedAccounts() {
-		return Result.ok(adminService.findAllLockedAccounts());
+	@GetMapping("/list")
+	public Result findAllAccounts() {
+		return Result.ok(adminService.findAllAccounts());
 	}
 
 	@PostMapping("/unlock")
@@ -28,18 +27,27 @@ public class AdminController {
 		adminService.unlock(card);
 		return Result.ok("解锁成功");
 	}
+
 	@PostMapping("/limit")
 	public Result limit(@RequestBody Account account) {
 		String card = account.getCard();
 		BigDecimal max = account.getMaxLimit();
 		BigDecimal min = account.getMinLimit();
-		adminService.limit(card,max,min);
+		adminService.limit(card, max, min);
 		return Result.ok("额度限制设置成功");
 	}
+
 	@GetMapping("/limit")
 	public Result findLimit(@RequestParam String card) {
 		Account account = adminService.findLimitByCard(card);
 		InfoResponse response = BeanUtil.copyProperties(account, InfoResponse.class);
 		return Result.ok(response);
+	}
+
+	@PostMapping("/lock")
+	public Result lock(@RequestBody Account account) {
+		String card = account.getCard();
+		adminService.lock(card);
+		return Result.ok("锁定成功");
 	}
 }
