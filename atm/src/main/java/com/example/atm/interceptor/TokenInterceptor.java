@@ -9,16 +9,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 
 import java.io.IOException;
 
+import static com.example.atm.Utils.RedisConstants.LOGIN_KEY;
+
 @Component
 @RequiredArgsConstructor
 public class TokenInterceptor implements HandlerInterceptor {
 	private final JwtUtils jwtUtils;
+	private final StringRedisTemplate stringRedisTemplate;
 	/**
 	 * 在请求处理之前进行拦截，验证请求的令牌。
 	 *
@@ -37,8 +41,19 @@ public class TokenInterceptor implements HandlerInterceptor {
 			return reject(response, "未登录");
 		}
 		try {
+			// 解析token获取用户信息
 			Claims claims = jwtUtils.parseUserOrAdminToken(token);
-			request.setAttribute(CurrentUser.ATTR, claims.get("card", String.class));  // 后面比对要用
+			String card = claims.get("card", String.class);
+			String status = claims.get("status",String.class);
+			request.setAttribute(CurrentUser.ATTR, card);
+			// 非测试用户需验证Redis中的会话一致性
+			if (!"TEST".equals(status)){
+				String jti = claims.get("jti", String.class);
+				String jti_R = stringRedisTemplate.opsForValue().get(LOGIN_KEY + card);
+				if (jti_R == null || !jti_R.equals(jti)) {
+					return reject(response, "登录已失效，请重新登录");
+				}
+			}
 		} catch (JwtException e) {
 			return reject(response, "登录已失效，请重新登录");
 		}

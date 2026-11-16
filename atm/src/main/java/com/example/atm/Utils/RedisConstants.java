@@ -5,6 +5,7 @@ public class RedisConstants {
 	public static final String FAIL_KEY = "login:fail:card:";
 	// 是否锁定
 	public static final String LOCK_KEY = "login:lock:card:";
-
+	// 当前登陆卡号
+	public static final String LOGIN_KEY = "login:card:";
 
 }

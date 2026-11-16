@@ -26,21 +26,21 @@ public class JwtUtils {
 	/**
 	 * 过期时间：15 分钟（毫秒）
 	 */
-	private static final long EXPIRATION_MS = 15 * 60 * 1000L;
-
+	private static final Long EXPIRATION_MS = 2 * 60 * 60 * 1000L;
+	private static final Long TEST_EXPIRATION_MS = 15 * 60 * 1000L;
+	private static final Long ADMIN_EXPIRATION_MS = 20 * 60 * 1000L;
 	/**
 	 * HS256 要求密钥至少 256 位，即 32 字节
 	 */
 	private static final int MIN_SECRET_BYTES = 32;
-
 	private final SecretKey secretKey;
-    private final SecretKey adminSecretKey;
+	private final SecretKey adminSecretKey;
 
 	/**
 	 * 启动时读取并校验密钥。密钥缺失、为空或过短都直接让应用启动失败，
 	 * 不会带着弱密钥运行。异常信息里不输出密钥内容。
 	 */
-	public JwtUtils(@Value("${atm.jwt.secret}") String secret,@Value("${atm.jwt.admin-secret}") String adminSecret) {
+	public JwtUtils(@Value("${atm.jwt.secret}") String secret, @Value("${atm.jwt.admin-secret}") String adminSecret) {
 		if (secret == null || secret.isBlank()) {
 			throw new IllegalStateException("未配置 JWT 密钥：请设置环境变量 ATM_JWT_SECRET");
 		}
@@ -50,7 +50,7 @@ public class JwtUtils {
 			throw new IllegalStateException("JWT 密钥过短：至少需要 " + MIN_SECRET_BYTES + " 个字符");
 		}
 		this.secretKey = Keys.hmacShaKeyFor(bytes);
-        this.adminSecretKey = Keys.hmacShaKeyFor(bytes1);
+		this.adminSecretKey = Keys.hmacShaKeyFor(bytes1);
 	}
 
 	/**
@@ -59,16 +59,11 @@ public class JwtUtils {
 	 * @param claims 自定义载荷数据（键值对）
 	 * @return JWT 令牌字符串
 	 */
-	public String generateToken(Map<String, Object> claims) {
-		Date now = new Date();
-		Date expireTime = new Date(now.getTime() + EXPIRATION_MS);
-
-		return Jwts.builder()
-				.claims(claims)
-				.issuedAt(now)
-				.expiration(expireTime)
-				.signWith(secretKey)
-				.compact();
+	public String getAccountToken(Map<String, Object> claims) {
+		if (claims.get("status").equals("TEST")){
+			return getToken(claims, TEST_EXPIRATION_MS,secretKey);
+		}
+		return getToken(claims, EXPIRATION_MS,secretKey);
 	}
 
 	/**
@@ -78,7 +73,7 @@ public class JwtUtils {
 	 * @return 载荷声明（Claims）
 	 * @throws io.jsonwebtoken.JwtException 令牌无效或已过期时抛出
 	 */
-	public Claims parseToken(String token) throws JwtException {
+	private Claims parseToken(String token) throws JwtException {
 		return Jwts.parser()
 				.verifyWith(secretKey)
 				.build()
@@ -93,15 +88,7 @@ public class JwtUtils {
 	 * @return 使用管理员密钥签名的 JWT 令牌字符串
 	 */
 	public String getAdminToken(Map<String, Object> claims) {
-		Date now = new Date();
-		Date expireTime = new Date(now.getTime() + EXPIRATION_MS);
-
-		return Jwts.builder()
-				.claims(claims)
-				.issuedAt(now)
-				.expiration(expireTime)
-				.signWith(adminSecretKey)
-				.compact();
+		return getToken(claims, ADMIN_EXPIRATION_MS,adminSecretKey);
 	}
 
 	/**
@@ -118,8 +105,13 @@ public class JwtUtils {
 				.parseSignedClaims(token)
 				.getPayload();
 	}
+
 	/**
-	 * 用户端接口使用：用户密钥或管理员密钥签发的 token 都接受。
+	 * 解析用户或管理员 JWT 令牌，获取载荷中的所有声明
+	 *
+	 * @param token 用户或管理员 JWT 令牌字符串
+	 * @return 载荷声明（Claims）
+	 * @throws io.jsonwebtoken.JwtException 令牌无效或已过期时抛出
 	 */
 	public Claims parseUserOrAdminToken(String token) throws JwtException {
 		try {
@@ -128,4 +120,24 @@ public class JwtUtils {
 			return parseAdminToken(token);   // 第二次也失败就抛出，由拦截器返回 401
 		}
 	}
+
+	/**
+	 * 根据指定载荷、有效期和签名密钥生成 JWT 令牌。
+	 *
+	 * @param claims 自定义载荷数据（键值对）
+	 * @param time 令牌有效时长，单位为毫秒
+	 * @param key 用于签名的密钥
+	 * @return 生成的 JWT 令牌字符串
+	 */
+	private String getToken(Map<String, Object> claims, Long time,SecretKey key) {
+		Date now = new Date();
+		Date expireTime = new Date(now.getTime() + time);
+		return Jwts.builder()
+				.claims(claims)
+				.issuedAt(now)
+				.expiration(expireTime)
+				.signWith(key)
+				.compact();
+	}
+
 }

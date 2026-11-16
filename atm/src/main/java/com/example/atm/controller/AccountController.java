@@ -92,10 +92,16 @@ public class AccountController {
 		accountService.closeAccount(req.getCard(), req.getPassword());
 		return Result.ok("注销成功");
 	}
+
 	@PostMapping("/limit")
-	public Result changeLimit(@RequestBody Account req){
+	public Result changeLimit(@RequestBody Account req) {
 		String card = req.getCard();
-		accountService.changeLimit(card,req.getDailyLimit());
+		accountService.changeLimit(card, req.getDailyLimit());
 		return Result.ok("修改成功");
+	}
+	// 探测是否存活（token是否过期）
+	@GetMapping("/survival")
+	public Result survival() {
+		return Result.ok();
 	}
 }

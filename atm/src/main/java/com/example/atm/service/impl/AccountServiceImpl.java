@@ -31,10 +31,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.example.atm.Utils.RedisConstants.FAIL_KEY;
-import static com.example.atm.Utils.RedisConstants.LOCK_KEY;
+import static com.example.atm.Utils.RedisConstants.*;
 
 @Slf4j
 @Service
@@ -87,7 +87,6 @@ public class AccountServiceImpl implements AccountService {
 			card = generateCard();
 		} while (accountMapper.findByCard(card) != null);
 		account.setCard(card);
-
 		accountMapper.insert(account);
 
 		Account saved = accountMapper.findByCard(card);
@@ -112,6 +111,7 @@ public class AccountServiceImpl implements AccountService {
 			loginFail(card, account.getStatus());
 			throw new LoginFailedException("卡号或密码错误");
 		}
+		// 进行密码比对
 		String decryptedPassword = decryptUserPassword(password);
 		//  BCrypt 比对，matches() 内部处理盐，无需手动提取
 		if (!bcrypt.matches(decryptedPassword, account.getPassword())) {
@@ -123,18 +123,23 @@ public class AccountServiceImpl implements AccountService {
 			log.info("未满7天，取消注销");
 			accountMapper.restoreCancelAccount(account.getCard());
 		}
+		// 为每个登陆账号生成唯一的标识符
+		String jti = UUID.randomUUID().toString();
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("card", account.getCard());
 		claims.put("name", account.getName());
+		claims.put("status", account.getStatus());
+		claims.put("jti", jti);
 		String token;
 		if (card.matches("[a-z]+") && account.getRole().equals("ADMIN")) {
 			// 特性卡号使用特殊的jwt密钥
 			token = jwtUtils.getAdminToken(claims);
 		} else {
-			token = jwtUtils.generateToken(claims);
+			token = jwtUtils.getAccountToken(claims);
 		}
+		stringRedisTemplate.opsForValue().set(LOGIN_KEY + card, jti,Duration.ofMinutes(15));
 		stringRedisTemplate.delete(FAIL_KEY + card);
-		//  返回 DTO，不含密码字段等敏感字段
+		//  返回 DTO，不含密码等敏感字段
 		LoginResponse rep = BeanUtil.copyProperties(account, LoginResponse.class);
 		rep.setToken(token);
 		return rep;
@@ -292,14 +297,14 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
-	public void changeLimit(String card,BigDecimal limit) {
+	public void changeLimit(String card, BigDecimal limit) {
 		Account account = accountMapper.findByCard(card);
 		BigDecimal max = account.getMaxLimit();
 		BigDecimal min = account.getMinLimit();
-		if(limit.compareTo(min)<0||limit.compareTo(max)>0){
+		if (limit.compareTo(min) < 0 || limit.compareTo(max) > 0) {
 			throw new DataFormatException("新的限额不在限额范围内！");
 		}
-		accountMapper.changeLimit(card,limit);
+		accountMapper.changeLimit(card, limit);
 	}
 
 	/**
