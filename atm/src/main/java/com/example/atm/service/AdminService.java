@@ -14,5 +14,8 @@ public interface AdminService {
 	void limit(String card, BigDecimal max, BigDecimal min);
 
 	Account findLimitByCard(String card);
+
 	void lock(String card);
+
+	void restore(String card);
 }

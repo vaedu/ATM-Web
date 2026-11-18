@@ -50,4 +50,11 @@ public class AdminController {
 		adminService.lock(card);
 		return Result.ok("锁定成功");
 	}
+	
+	@PostMapping("restore")
+	public Result restore(@RequestBody Account account) {
+		String card = account.getCard();
+		adminService.restore(card);
+		return Result.ok("恢复成功");
+	}
 }

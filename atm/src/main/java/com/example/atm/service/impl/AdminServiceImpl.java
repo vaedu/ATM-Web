@@ -85,4 +85,14 @@ public class AdminServiceImpl implements AdminService {
 		accountMapper.lockAccount(card);
 		sessionManager.revoke(card);
 	}
+
+	@Override
+	public void restore(String card) {
+		String status = accountMapper.findByCard(card).getStatus();
+		if (!status.equals("CANCEL")){
+			throw new AccountNotCloseException("该账号未注销");
+		}
+		adminMapper.restore(card);
+	}
+
 }

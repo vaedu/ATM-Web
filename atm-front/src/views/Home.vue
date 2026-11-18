@@ -19,10 +19,10 @@
           <el-button class="btn" @click="router.push('/withdraw')">取款</el-button>
           <el-button class="btn" @click="router.push('/transfer')">转账</el-button>
           <el-button class="btn" @click="router.push('/limit')">调整限额</el-button>
-          <el-button class="btn" @click="router.push('/change-password')">修改密码</el-button>
+          <el-button v-if="!isAdmin && !isTest" class="btn" @click="router.push('/change-password')">修改密码</el-button>
           <el-button class="btn" @click="router.push('/transaction-records')">交易记录</el-button>
           <el-button class="btn" @click="router.push('/limit')">调整限额</el-button>
-          <el-button class="btn" @click="dialogVisible = true">注销账户</el-button>
+          <el-button v-if="!isAdmin && !isTest" class="btn" @click="dialogVisible = true">注销账户</el-button>
           <el-button v-if="isAdmin" class="btn" type="primary" @click="router.push('/admin/lock')">管理后台</el-button>
         </div>
       </div>
@@ -99,6 +99,7 @@ import {encryptPassword} from "@/assets/scripts/encryption.js";
 import request from "@/utils/request.js";
 
 const isAdmin = ref(false);
+const isTest = ref(false);
 // 路由
 const router = useRouter();
 
@@ -205,6 +206,7 @@ async function loadAccountInfo(card, token) {
     document.getElementById("limit").textContent = data.dailyLimit || 0;
     // 根据后端返回的角色决定是否显示管理员入口
     isAdmin.value = data.role === "ADMIN";
+    isTest.value = data.status === "TEST";
     // 同步更新 sessionStorage 中的余额信息，保持数据一致性
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
     userInfo.balance = data.balance;

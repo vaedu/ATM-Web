@@ -34,4 +34,6 @@ public interface AdminMapper {
 	void unlock(@Param("card") String card);
 	@Update("UPDATE account SET max_limit = #{max},min_limit = #{min} WHERE card = #{card}")
 	void limit(@Param("card") String card, @Param("max") BigDecimal max, @Param("min") BigDecimal min);
+    @Update("UPDATE account SET status = 'ACTIVE',close_time = NULL WHERE card = #{card}")
+	void restore(String card);
 }

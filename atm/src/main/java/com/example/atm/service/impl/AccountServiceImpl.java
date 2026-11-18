@@ -233,7 +233,7 @@ public class AccountServiceImpl implements AccountService {
 	public boolean changePassword(String card, String oldPwd, String newPwd) {
 		Account a = accountMapper.findByCard(card);
 		if (a == null) throw new AccountNotFoundException("用户不存在");
-		assertNotDemoAccount(a);
+		assertNotProtectedAccount(a);
 		String decryptedOld;
 		String decryptedNew;
 		try {
@@ -285,7 +285,7 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public void closeAccount(String card, String password) {
 		Account user = accountMapper.findByCard(card);
-		assertNotDemoAccount(user);
+		assertNotProtectedAccount(user);
 		BigDecimal balance = user.getBalance();
 		String decryptedPassword = decryptUserPassword(password);
 		if (!bcrypt.matches(decryptedPassword, user.getPassword())) {
@@ -299,6 +299,8 @@ public class AccountServiceImpl implements AccountService {
 			// 余额在读取之后发生了变动（或状态已变），统一终止
 			throw new ConcurrentUpdateException("账户状态已变化，请重试");
 		}
+		// 注销完成后将该卡号的令牌作废
+		sessionManager.revoke(card);
 	}
 
 	@Override
@@ -440,14 +442,18 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	/**
-	 * 校验指定 Account 是否不是测试账户。
+	 * 校验 account 是否为受保护账户，测试账户或管理员账户将不允许执行当前操作。
 	 *
 	 * @param account 待校验的账户
-	 * @throws AccountVerificationException 当账户状态为 TEST 时抛出
+	 * @throws AccountVerificationException 当账户状态为 TEST 或角色为 ADMIN 时抛出
 	 */
-	private void assertNotDemoAccount(Account account) {
+	private void assertNotProtectedAccount(Account account) {
 		if ("TEST".equals(account.getStatus())) {
 			throw new AccountVerificationException("账户为测试账户，不能进行此操作");
 		}
+		if (account.getRole().equals("ADMIN")) {
+			throw new AccountVerificationException("管理员账户不能进行此操作");
+		}
+
 	}
 }
